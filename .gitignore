@@ -1,0 +1,4 @@
+
+*.sqlite3
+__init__.py
+__pycache__/
