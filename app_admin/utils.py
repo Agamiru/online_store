@@ -18,16 +18,33 @@ bold_before_break = re.compile(r"<b>[^<]+</b>[^<]*<*b*r*/*>*")    # Gets all lin
 def table_to_json_converter(html_table_data):
 
     table = bs(html_data, features="html.parser").find_all("tr")
+
+    # Contains all table data for that row, first item is the main spec, rest is values.
     table_data = [[cell.text for cell in row.find_all("td")] for row in table]
-    print(f"len_table_data: {len(table_data)}\n\n")
+    print(f"len_table_data: {table_data}\n\n")
 
     separated_values, no_of_values = populate_lists(html_table_data)
-    # assert len(separated_values) == len(no_of_values), "Things aren't adding up"
     values_list = json_values_preparer(no_of_values, separated_values)
 
-    json_data = json.dumps(values_list, indent=2, ensure_ascii=False)
+    assert len(values_list) == len(no_of_values), "Things aren't adding up"
+    assert len(values_list) == len(table_data), "Things aren't adding up"
+
+    final_dict = spec_values_dict(table_data, values_list)
+
+    json_data = json.dumps(final_dict, indent=2, ensure_ascii=False)
 
     return json_data
+
+
+def spec_values_dict(table_data, values_list) -> dict:
+    spec_values_dict = {}
+    count = 0
+    for value in table_data:
+        dict_ = {value[0]: values_list[count]}
+        spec_values_dict.update(dict_)
+        count += 1
+
+    return spec_values_dict
 
 
 def populate_lists(html_table_data) -> Tuple[List, List]:
@@ -109,13 +126,120 @@ def json_values_preparer(no_of_values: list, separated_values: list):
     return new_list
 
 
-# new_list = json_values_preparer(no_of_values, separated_values)
-# print(f"new_list: {new_list}\nlength: {len(new_list)}\n")
-#
-# print(f"separated_values: {separated_values}\nlength: {len(separated_values)}\n\n")
-# print(f"no_of_values: {no_of_values}\nlenth: {len(no_of_values)}\n\n")
+class BhphotovideoTableConverter:
+
+    tag_popper = re.compile(r"^<[^>]+>")    # Pops rows that begin with a tag
+    span_attr_popper = re.compile(r"^<span\s\w+")    # Pops span tags with attributes
+    bold_before_break = re.compile(r"<b>[^<]+</b>[^<]*<*b*r*/*>*")    # Gets all lines of values
+
+    def __init__(self, html_table_data):
+        self.html_table_data = html_table_data
+
+    def convert(self):
+
+        table = bs(self.html_table_data, features="html.parser").find_all("tr")
+
+        # Contains all table data for that row, first item is the main spec, rest is values.
+        table_data = [[cell.text for cell in row.find_all("td")] for row in table]
+
+        separated_values, no_of_values = self._populate_lists()
+        values_list = self._json_values_preparer(no_of_values, separated_values)
+
+        assert len(values_list) == len(no_of_values), "Things aren't adding up"
+        assert len(values_list) == len(table_data), "Things aren't adding up"
+
+        final_dict = self._spec_values_dict(table_data, values_list)
+
+        json_data = json.dumps(final_dict, indent=2, ensure_ascii=False)
+
+        return json_data
+
+    def _populate_lists(self) -> Tuple[List, List]:
+
+        # Populate separated_values and no_of_values
+        separated_values = []    # A list of all separated values
+        no_of_values = []    # A list of dictionary pairs {no_items: pairs of values}
+
+        # Find all rows with span tags
+        for row in bs(self.html_table_data, "lxml").find_all("span"):
+            # Pop rows with span tags that have attributes
+            if __class__.span_attr_popper.match(str(row)):
+                continue
+            line_breaks = len(row.find_all('br')) + 1
+            no_of_pairs = len(__class__.bold_before_break.findall(str(row)))
+            no_of_values.append({line_breaks: no_of_pairs})
+            for child in row.descendants:
+                # print(child)
+                if __class__.tag_popper.match(str(child)):
+                    continue
+                separated_values.append(child)
+
+        return separated_values, no_of_values
+
+    @staticmethod
+    def _json_values_preparer(no_of_values: list, separated_values: list):
+
+        new_list = []       # List with all values in dict or list format
+        main_count = 0
+        for dict_ in no_of_values:
+            for k, v in dict_.items():
+                all_values = []
+                key_values = []
+                dict_2 = {}
+                list_2 = []
+                # Populate all_values list
+                try:
+                    a = k // v
+                except ZeroDivisionError:
+                    for value_main in separated_values[main_count:main_count + k]:
+                        all_values.append(value_main)
+                    for val in all_values:
+                        list_2.append(val)
+                    new_list.append(list_2)
+                    main_count += k
+                else:
+                    if a == 2:
+                        order_count = 0
+                        for value_main in separated_values[main_count:main_count + k]:
+                            all_values.append(value_main)
+                        for value_sub in all_values[::2]:
+                            key_values.append(value_sub)
+                        for item in key_values:
+                            if item in all_values:      # todo: might be redundant
+                                order_count += 1
+                                dict_2.update({item: all_values[order_count]})
+                            order_count += 1
+                        new_list.append(dict_2)
+                        main_count += k
+                    else:
+                        outer_count_ = 0
+                        for value_main in separated_values[main_count:main_count + (k + v)]:
+                            all_values.append(value_main)
+                        for value_sub in all_values[::2]:
+                            key_values.append(value_sub)
+                        for item in key_values:
+                            if item in all_values:      # todo: might be redundant
+                                outer_count_ += 1
+                                list_2.append(item + "" + all_values[outer_count_])
+                            outer_count_ += 1
+                        new_list.append(list_2)
+                        main_count += k + v
+
+        return new_list
+
+    def _spec_values_dict(self, table_data, values_list) -> dict:
+        spec_values_dict = {}
+        count = 0
+        for value in table_data:
+            dict_ = {value[0]: values_list[count]}
+            spec_values_dict.update(dict_)
+            count += 1
+
+        return spec_values_dict
 
 
-print(table_to_json_converter(html_data))
+# print(table_to_json_converter(html_data))
+tabul = BhphotovideoTableConverter(html_data)
+print(f"tabul: {tabul.convert()}")
 
 
