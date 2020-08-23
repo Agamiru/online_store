@@ -1,4 +1,5 @@
 from django.db import models
+from .model_utils import *
 # Create your models here.
 
 
@@ -56,8 +57,28 @@ class Product(models.Model):
     package_dimensions = models.CharField(max_length=200)
     weight = models.IntegerField(null=True)
 
+    def get_brand_name(self) -> str:
+        brand_obj = Brand.objects.get(pk=self.brand)
+        brand_name = brand_obj.name
+
+        return brand_name
+
+    def get_product_name(self) -> str:
+        brand_name = self.get_brand_name()
+
+        return f"{brand_name} {self.model_name}"
+
     class Meta:
         db_table = "products"
 
+
+class Image(models.Model):
+    prod_id = models.OneToOneField(Product, on_delete=models.CASCADE, related_name="images")
+    full_image = models.ImageField(null=False, upload_to=storage_dir)
+    thumbnail = models.ImageField(null=True)    # Todo: Function for generating thumbnail
+    date_uploaded = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "image"
 
 

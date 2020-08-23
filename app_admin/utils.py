@@ -177,7 +177,7 @@ class BhphotovideoTableConverter:
         return separated_values, no_of_values
 
     @staticmethod
-    def _json_values_preparer(no_of_values: list, separated_values: list):
+    def _json_values_preparer(no_of_values: list, separated_values: list) -> List:
 
         new_list = []       # List with all values in dict or list format
         main_count = 0
@@ -238,8 +238,10 @@ class BhphotovideoTableConverter:
         return spec_values_dict
 
 
-# print(table_to_json_converter(html_data))
-tabul = BhphotovideoTableConverter(html_data)
-print(f"tabul: {tabul.convert()}")
+
+if __name__ == "__main__":
+    # print(table_to_json_converter(html_data))
+    tabul = BhphotovideoTableConverter(html_data)
+    print(f"tabul: {tabul.convert()}")
 
 
