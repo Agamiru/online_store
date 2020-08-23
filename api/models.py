@@ -13,6 +13,7 @@ class Category(models.Model):
 
     class Meta:
         db_table = "categories"
+        verbose_name_plural = "categories"
 
 
 class Brand(models.Model):
