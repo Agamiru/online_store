@@ -134,6 +134,7 @@ class BhphotovideoTableConverter:
 
     def __init__(self, html_table_data):
         self.html_table_data = html_table_data
+        self.final_dict = None
 
     def convert(self):
 
@@ -149,6 +150,7 @@ class BhphotovideoTableConverter:
         assert len(values_list) == len(table_data), "Things aren't adding up"
 
         final_dict = self._spec_values_dict(table_data, values_list)
+        self.final_dict = final_dict
 
         json_data = json.dumps(final_dict, indent=2, ensure_ascii=False)
 
@@ -242,6 +244,10 @@ class BhphotovideoTableConverter:
 if __name__ == "__main__":
     # print(table_to_json_converter(html_data))
     tabul = BhphotovideoTableConverter(html_data)
-    print(f"tabul: {tabul.convert()}")
+    json_table = tabul.convert()
+    dims = tabul.final_dict["Box Dimensions (LxWxH)"]
+
+    print(f"dim: {dims[0]}")
+    print(json_table)
 
 

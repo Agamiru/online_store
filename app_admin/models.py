@@ -50,6 +50,3 @@ class User(AbstractUser):
         verbose_name = "users"
         verbose_name_plural = "users"
         db_table = "users"
-
-
-
