@@ -263,11 +263,6 @@ class CreateProduct:
         Congratulations you've successfully saved the product {prod}
         """)
 
-
-
-
-
-
     def get_possible_accessories(self):
         list_ = list()
         list_.append([obj for obj in self.category_model.objects.all()])

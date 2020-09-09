@@ -12,11 +12,8 @@ def json_default():
 
 
 def storage_dir(instance, filename) -> str:
-    product_instance = Product.objects.get(pk=instance.prod_id.id)
-    if not product_instance:
-        raise ValueError("Model received None as response")
-    brand_name = product_instance.get_brand_name().replace(" ", "_")
-    model_name = product_instance.model_name.name.replace(" ", "_")
+    brand_name = instance.brand
+    model_name = instance.model_name.name.replace(" ", "_")
 
     return f"{brand_name}/{model_name}/{filename}"
 
@@ -100,58 +97,52 @@ class ModelName(models.Model):
         return f"{self.name}"
 
 
-class MainFeatures(models.Model):
-    cat_id = models.ForeignKey(
-        Category, related_name="features",
-        on_delete=models.CASCADE, null=False
-    )
-    features = models.JSONField(default=json_default)
-
-    class Meta:
-        db_table = "features"
-
-
-class Image(models.Model):
-    file_path = models.ImageField(null=False, upload_to=storage_dir)
-    date_uploaded = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return '%s object (%s)' % (self.__class__.__name__, self.file_path)
-
-    class Meta:
-        db_table = "images"
-
-
 class AbstractModel(models.Model):
 
     cat_id = models.ForeignKey(
-        Category, models.SET_NULL, null=True
+        Category, models.SET_NULL, null=True,
     )
     subcat_1_id = models.ForeignKey(
-        SubCategory1, models.SET_NULL, null=True
+        SubCategory1, models.SET_NULL, null=True, blank=True,
     )
 
     subcat_2_id = models.ForeignKey(
-        SubCategory2, models.SET_NULL, null=True
+        SubCategory2, models.SET_NULL, null=True, blank=True,
     )
+
+    def return_appropriate_category(self):
+        try:
+            sub_cat_2_name = self.subcat_2_id.name
+            return sub_cat_2_name
+        except (doesnt_exist, AttributeError):  # Attribute error means it returned None type
+            try:
+                sub_cat_1_name = self.subcat_1_id.name
+                return sub_cat_1_name
+            except (doesnt_exist, AttributeError):
+                return self.cat_id.name
 
     class Meta:
         abstract = True
+
+
+class MainFeatures(AbstractModel):
+
+    features = models.JSONField(default=json_default)
+
+    def __str__(self):
+        cat_name = self.return_appropriate_category()
+        return f"Main Features for '{cat_name}'"
+
+    class Meta:
+        db_table = "features"
 
 
 class Accessories(AbstractModel):
     accessories = models.JSONField(default=json_default)
 
     def __str__(self):
-        try:
-            sub_cat_2_name = self.subcat_2_id.name
-            return f"Accessories for '{sub_cat_2_name}'"
-        except doesnt_exist:
-            try:
-                sub_cat_1_name = self.subcat_1_id.name
-                return f"Accessories for '{sub_cat_1_name}'"
-            except doesnt_exist:
-                return f"Accessories for '{self.cat_id.name}'"
+        cat_name = self.return_appropriate_category()
+        return f"Accessories for '{cat_name}'"
 
     class Meta:
         db_table = "accessories"
@@ -162,15 +153,8 @@ class BoughtTogether(AbstractModel):
     bought_together = models.JSONField(default=json_default)
 
     def __str__(self):
-        try:
-            sub_cat_2_name = self.subcat_2_id.name
-            return f"Bought together for '{sub_cat_2_name}'"
-        except doesnt_exist:
-            try:
-                sub_cat_1_name = self.subcat_1_id.name
-                return f"Bought together for '{sub_cat_1_name}'"
-            except doesnt_exist:
-                return f"Bought together for '{self.cat_id.name}'"
+        cat_name = self.return_appropriate_category()
+        return f"Bought together for '{cat_name}'"
 
     class Meta:
         db_table = "bought_together"
@@ -182,12 +166,12 @@ class Product(AbstractModel):
 
     main_features = models.OneToOneField(
         MainFeatures, on_delete=models.SET_NULL,
-        related_name="product", null=True,
+        related_name="product", null=True, blank=True,
     )
 
     brand = models.ForeignKey(
         Brand, on_delete=models.SET_NULL, related_name="product",
-        null=True
+        null=True, default="Generic"
     )
 
     model_name = models.OneToOneField(
@@ -195,24 +179,24 @@ class Product(AbstractModel):
         to_field="name",
     )
 
-    image = models.ForeignKey(
-        Image, on_delete=models.SET_NULL, related_name="product", null=True
-    )
+    image = models.ImageField(null=True, upload_to=storage_dir, blank=True)
 
     accessories = models.ForeignKey(
-        Accessories, on_delete=models.SET_NULL, related_name="product", null=True
+        Accessories, on_delete=models.SET_NULL, related_name="product", null=True,
+        blank=True,
     )
 
     bought_together = models.ForeignKey(
-        BoughtTogether, on_delete=models.SET_NULL, related_name="product", null=True
+        BoughtTogether, on_delete=models.SET_NULL, related_name="product", null=True,
+        blank=True,
     )
 
     short_desc = models.CharField("Short Description", max_length=200)
     price = models.FloatField(null=False)
     in_the_box = models.JSONField(default=json_default)
     specs = models.JSONField(default=json_default)
-    package_dimensions = models.CharField(max_length=200, null=True)
-    weight = models.CharField(max_length=200, null=True)
+    package_dimensions = models.CharField(max_length=200, null=True, blank=True,)
+    weight = models.CharField(max_length=200, null=True, blank=True,)
     date_created = models.DateTimeField(auto_now=True)
 
     def get_brand_name(self) -> str:
@@ -224,13 +208,14 @@ class Product(AbstractModel):
 
         return brand_name
 
-    def get_product_name(self) -> str:
+    def product_name(self) -> str:
         brand_name = self.get_brand_name()
 
         return f"{brand_name} {self.model_name}"
 
     def __str__(self):
-        return f"Product: {self.get_product_name()}"
+        cat_name = self.return_appropriate_category()
+        return f"{self.product_name()} in {cat_name}"
 
     class Meta:
         db_table = "products"

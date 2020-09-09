@@ -152,8 +152,18 @@ class BhphotovideoTableConverter:
         final_dict = self._spec_values_dict(table_data, values_list)
         self.final_dict = final_dict
 
-        json_data = json.dumps(final_dict, indent=2, ensure_ascii=False)
+    def to_python_dict(self):
+        if self.final_dict:
+            return self.final_dict
+        self.convert()
+        return self.final_dict
 
+    def to_json(self):
+        if self.final_dict:
+            pass
+        else:
+            self.convert()
+        json_data = json.dumps(self.final_dict, indent=2, ensure_ascii=False)
         return json_data
 
     def _populate_lists(self) -> Tuple[List, List]:
