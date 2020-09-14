@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Product, MainFeatures, Brand, Category, SubCategory1,
-    SubCategory2, ModelName, CategoryAccessories, CatAccessoryJoin   # Accessories, BoughtTogether
+    SubCategory2, ModelName, Accessories, BoughtTogether
 )
 from django import forms
 from django.forms.widgets import TextInput
@@ -153,7 +153,7 @@ admin.site.register(Category)
 admin.site.register(SubCategory1)
 admin.site.register(SubCategory2)
 admin.site.register(ModelName)
-admin.site.register(CategoryAccessories)
-admin.site.register(CatAccessoryJoin)
-# admin.site.register(Accessories)
-# admin.site.register(BoughtTogether)
+# admin.site.register(CategoryAccessories)
+# admin.site.register(CatAccessoryJoin)
+admin.site.register(Accessories)
+admin.site.register(BoughtTogether)
