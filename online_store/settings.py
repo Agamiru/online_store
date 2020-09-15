@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'online_store.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'online_store',
+        'NAME': 'store_db',
         'USER': 'postgres',
         'PASSWORD': 'aGAMIRu',
         'HOST': 'localhost',

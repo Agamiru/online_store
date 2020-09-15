@@ -1,13 +1,15 @@
 from django.contrib import admin
 from .models import (
-    Product, MainFeatures, Brand, Category, SubCategory1,
-    SubCategory2, ModelName, Accessories, BoughtTogether
+    Product, Brand, Category, SubCategory1,
+    SubCategory2, ModelName, CategoryDouble, CategoryAccessoryJoin,
+    CategoryBoughtTogetherJoin,
 )
 from django import forms
 from django.forms.widgets import TextInput
 from django.forms.fields import JSONField, JSONString
 from django.core.exceptions import ValidationError, ObjectDoesNotExist as doesntExist
 from django.contrib import messages
+import zlib
 
 from app_admin.utils import BhphotovideoTableConverter
 import json
@@ -16,9 +18,12 @@ import json
 
 
 class SpecsField(JSONField):
-
+    # Check for 3 possibilities:
+    # 1. Value wasn't filled.
+    # 2. Value comes in expected format.
+    # 3. Value is default-filled "null".
     def to_python(self, value):
-        if not value:
+        if not value:       # Value wasn't filled
             return None
         string_value = str(value)
         if string_value.startswith("<") and string_value.endswith(">"):  # html check
@@ -33,6 +38,9 @@ class SpecsField(JSONField):
                     code='invalid',
                     params={'value': value},
                 )
+        if string_value == "null":      # Default value check
+            return "null"
+
         return "in_database"
 
 
@@ -44,6 +52,10 @@ class InTheBoxField(JSONField):
         value = str(value)
         if value.startswith("[") and value.endswith("]"):       # List checker
             return "in_database"
+
+        if value == "null":     # default checker
+            return "null"
+
         items = value.split("\n")       # For lists delimited by a new line character
         items_2 = value.split(",")      # For lists delimited by a comma
 
@@ -67,11 +79,17 @@ class ProductForm(forms.ModelForm):
 
     def clean(self):
         self._validate_unique = True
-        specs = self.cleaned_data.get("specs")
+        specs = self.cleaned_data.get("specs")  # Can be None, Html or "null"
         # specs.pop("Box Dimensions (LxWxH)")
         # specs.pop("Package Weight")
         if not specs:       # Ideally, field validations should have checked for this already
             raise ValidationError("This field receives 'None' as value")
+
+        if specs == "null":
+            self.cleaned_data["specs"] = json.dumps(None)
+
+        if self.cleaned_data["in_the_box"] == "null":
+            self.cleaned_data["in_the_box"] = json.dumps(None)
 
         id = self.instance.id
         pd = self.cleaned_data.get("package_dimensions")  # Package Dimensions
@@ -104,7 +122,11 @@ class ProductForm(forms.ModelForm):
                 # Use filled package dimensions if available, else take from specs
                 if not pd:
                     self.cleaned_data["package_dimensions"] = package_dims[0]
-            except KeyError:
+
+            # Key error in case specs has no package dimensions
+            # Type error in case "null" is returned as string indices must be integers
+            except (KeyError, TypeError):
+                self.cleaned_data["specs"] = None
                 pass
                 # Todo: Should display a message notifying the user there are no package_dimensions
                 # self.add_error("package_dimensions", f"Specs has no {e}")
@@ -114,7 +136,7 @@ class ProductForm(forms.ModelForm):
                 # Confirm weight from spec are same as filled, else use weight from specs
                 if not w:
                     self.cleaned_data["weight"] = weight[0]
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
                 # Todo: Should display a message notifying the user there is no weight
                 # self.add_error("weight", f"Specs has no {e}")
@@ -135,25 +157,87 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
 
 
+class CategoryAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        acc_instance = CategoryDouble.objects.create(cat_id=obj)
+        acc_instance.save()
+
+
+class CategoryAccessoryJoinForm(forms.ModelForm):
+
+    def clean(self):
+        self._validate_unique = True
+        cat_id_1 = self.cleaned_data["cat_id"].id
+        cat_id_2 = self.cleaned_data["accessory_id"].cat_id.id
+
+        if cat_id_1 == cat_id_2:
+            self.add_error("accessory_id", "Cannot add the same objects")
+
+        hash_value = f"{cat_id_1}{cat_id_2}"
+        # print(f"hash_value: {hash_value}\n")
+
+        self.cleaned_data["hash_field"] = zlib.adler32(bytes(hash_value, encoding="utf-8"))
+        # print(f"hash_field: {self.cleaned_data['hash_field']}")
+
+        return self.cleaned_data
+
+    class Meta:
+        model = CategoryAccessoryJoin
+        fields = "__all__"
+        widgets = {
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+        }
+
+
+class CategoryAccessoryJoinAdmin(admin.ModelAdmin):
+    # list_display = ["cat_id", "accessory_id", "hash_field"]
+
+    form = CategoryAccessoryJoinForm
+
+
+class CategoryBoughtTogetherJoinForm(forms.ModelForm):
+
+    def clean(self):
+        self._validate_unique = True
+        cat_id_1 = self.cleaned_data["cat_id"].id
+        cat_id_2 = self.cleaned_data["bought_together_id"].cat_id.id
+
+        if cat_id_1 == cat_id_2:
+            self.add_error("bought_together_id", "Cannot add the same objects")
+
+        hash_value = f"{cat_id_1}{cat_id_2}"
+        # print(f"hash_value: {hash_value}\n")
+
+        self.cleaned_data["hash_field"] = zlib.adler32(bytes(hash_value, encoding="utf-8"))
+        # print(f"hash_field: {self.cleaned_data['hash_field']}")
+
+        return self.cleaned_data
+
+    class Meta:
+        model = CategoryBoughtTogetherJoin
+        fields = "__all__"
+        widgets = {
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+        }
+
+
+class CategoryBoughtTogetherJoinAdmin(admin.ModelAdmin):
+    # list_display = ["cat_id", "accessory_id", "hash_field"]
+
+    form = CategoryBoughtTogetherJoinForm
 
 
 
 
-    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    #     pass
-
-    # def add_html_table(self, obj):
-    #     return obj.brand
-
-    # add_html_table.empty_value_display = "???"
-
-admin.site.register(MainFeatures)
+# admin.site.register(MainFeatures)
 admin.site.register(Brand)
-admin.site.register(Category)
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory1)
 admin.site.register(SubCategory2)
 admin.site.register(ModelName)
 # admin.site.register(CategoryAccessories)
-# admin.site.register(CatAccessoryJoin)
-admin.site.register(Accessories)
-admin.site.register(BoughtTogether)
+admin.site.register(CategoryAccessoryJoin, CategoryAccessoryJoinAdmin)
+# admin.site.register(Accessories)
+admin.site.register(CategoryBoughtTogetherJoin, CategoryBoughtTogetherJoinAdmin)

@@ -5,10 +5,9 @@ from .model_utils import *
 import json
 from typing import List, Tuple
 
-def json_default():
-    null = json.dumps(None)
 
-    return null
+def json_default():
+    return json.dumps(None)
 
 
 def storage_dir(instance, filename) -> str:
@@ -44,6 +43,58 @@ class Category(models.Model):
     class Meta:
         db_table = "categories"
         verbose_name_plural = "categories"
+
+
+class CategoryDouble(models.Model):
+    cat_id = models.OneToOneField(
+        Category, on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        cat_name = Category.objects.get(pk=self.cat_id.id).name
+        return f"{cat_name}" if self.cat_id else "Null"
+
+    class Meta:
+        db_table = "category_double"
+        verbose_name_plural = "category_double"
+
+
+class CategoryAccessoryJoin(models.Model):
+    cat_id = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, related_name="accessory_join", null=True,
+        blank=False,
+    )
+    accessory_id = models.ForeignKey(
+        CategoryDouble, on_delete=models.SET_NULL, related_name="category_join",
+        null=True, blank=False, to_field="cat_id"
+    )
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    def __str__(self):
+        return f"Accessory for {self.cat_id.name}" if self.cat_id else "Null"
+
+    class Meta:
+        db_table = "category_accessories"
+        verbose_name_plural = "category_accessories"
+
+
+class CategoryBoughtTogetherJoin(models.Model):
+    cat_id = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, related_name="bought_together_join", null=True,
+        blank=False,
+    )
+    bought_together_id = models.ForeignKey(
+        CategoryDouble, on_delete=models.SET_NULL, related_name="bought_join",
+        null=True, blank=False, to_field="cat_id"
+    )
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    def __str__(self):
+        return f"Frequently bought together for {self.cat_id.name}" if self.cat_id else "Null"
+
+    class Meta:
+        db_table = "category_bought_together"
+        verbose_name_plural = "category_bought_together"
 
 
 class SubCategory1(models.Model):
@@ -119,55 +170,34 @@ class AbstractModel(models.Model):
                 sub_cat_1_name = self.subcat_1_id.name
                 return sub_cat_1_name
             except (doesnt_exist, AttributeError):
-                return self.cat_id.name
+                try:
+                    return self.cat_id.name
+                except (doesnt_exist, AttributeError):
+                    return None
 
     class Meta:
         abstract = True
 
 
-class MainFeatures(AbstractModel):
-
-    features = models.JSONField(default=json_default)
-
-    def __str__(self):
-        cat_name = self.return_appropriate_category()
-        return f"Main Features for '{cat_name}'"
-
-    class Meta:
-        db_table = "features"
-
-
-class Accessories(AbstractModel):
-    accessories = models.JSONField(default=json_default)
-
-    def __str__(self):
-        cat_name = self.return_appropriate_category()
-        return f"Accessories for '{cat_name}'"
-
-    class Meta:
-        db_table = "accessories"
-        verbose_name_plural = "accessories"
-
-
-class BoughtTogether(AbstractModel):
-    bought_together = models.JSONField(default=json_default)
-
-    def __str__(self):
-        cat_name = self.return_appropriate_category()
-        return f"Bought together for '{cat_name}'"
-
-    class Meta:
-        db_table = "bought_together"
-        verbose_name_plural = "bought_together"
+# class MainFeatures(AbstractModel):
+#
+#     features = models.JSONField(default=json_default)
+#
+#     def __str__(self):
+#         cat_name = self.return_appropriate_category()
+#         return f"Main Features for '{cat_name}'"
+#
+#     class Meta:
+#         db_table = "features"
 
 
 # Todo: Create an admin page for adding products
 class Product(AbstractModel):
 
-    main_features = models.OneToOneField(
-        MainFeatures, on_delete=models.SET_NULL,
-        related_name="product", null=True, blank=True,
-    )
+    # main_features = models.OneToOneField(
+    #     MainFeatures, on_delete=models.SET_NULL,
+    #     related_name="product", null=True, blank=True,
+    # )
 
     brand = models.ForeignKey(
         Brand, on_delete=models.SET_NULL, related_name="product",
@@ -181,18 +211,9 @@ class Product(AbstractModel):
 
     image = models.ImageField(null=True, upload_to=storage_dir, blank=True)
 
-    accessories = models.ForeignKey(
-        Accessories, on_delete=models.SET_NULL, related_name="product", null=True,
-        blank=True,
-    )
-
-    bought_together = models.ForeignKey(
-        BoughtTogether, on_delete=models.SET_NULL, related_name="product", null=True,
-        blank=True,
-    )
-
     short_desc = models.CharField("Short Description", max_length=200)
     price = models.FloatField(null=False)
+    available = models.BooleanField(default=True)
     in_the_box = models.JSONField(default=json_default)
     specs = models.JSONField(default=json_default)
     package_dimensions = models.CharField(max_length=200, null=True, blank=True,)
