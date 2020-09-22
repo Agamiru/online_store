@@ -45,6 +45,9 @@ class Category(models.Model):
         verbose_name_plural = "categories"
 
 
+# A clone model used as a join for its parent model (Category)
+# This model shouldn't be directly updated, its parent model will update it.
+# The same naming scheme and function apply Subcategory1 and Subcategory2
 class CategoryDouble(models.Model):
     cat_id = models.OneToOneField(
         Category, on_delete=models.CASCADE,
@@ -59,14 +62,15 @@ class CategoryDouble(models.Model):
         verbose_name_plural = "category_double"
 
 
+# Accessories for Categories
 class CategoryAccessoryJoin(models.Model):
     cat_id = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, related_name="accessory_join", null=True,
+        Category, on_delete=models.CASCADE, related_name="accessory_join",
         blank=False,
     )
     accessory_id = models.ForeignKey(
-        CategoryDouble, on_delete=models.SET_NULL, related_name="category_join",
-        null=True, blank=False, to_field="cat_id"
+        CategoryDouble, on_delete=models.CASCADE, related_name="category_join",
+        blank=False, to_field="cat_id"
     )
     hash_field = models.IntegerField(blank=True, unique=True)
 
@@ -78,14 +82,15 @@ class CategoryAccessoryJoin(models.Model):
         verbose_name_plural = "category_accessories"
 
 
+# Bought Together for Categories
 class CategoryBoughtTogetherJoin(models.Model):
     cat_id = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, related_name="bought_together_join", null=True,
+        Category, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
     )
     bought_together_id = models.ForeignKey(
-        CategoryDouble, on_delete=models.SET_NULL, related_name="bought_join",
-        null=True, blank=False, to_field="cat_id"
+        CategoryDouble, on_delete=models.CASCADE, related_name="bought_join",
+        blank=False, to_field="cat_id"
     )
     hash_field = models.IntegerField(blank=True, unique=True)
 
@@ -97,6 +102,15 @@ class CategoryBoughtTogetherJoin(models.Model):
         verbose_name_plural = "category_bought_together"
 
 
+# Main Features for Categories
+class CategoryMainFeatures(models.Model):
+    cat_id = models.OneToOneField(
+        Category, on_delete=models.CASCADE, related_name="main_features"
+    )
+    features = models.JSONField(default=json_default)
+
+
+# Subcategory 1
 class SubCategory1(models.Model):
 
     cat_id = models.ForeignKey(
@@ -112,9 +126,71 @@ class SubCategory1(models.Model):
         verbose_name_plural = "subcategories_1"
 
 
+class Subcat1Double(models.Model):
+    subcat_1_id = models.OneToOneField(
+        SubCategory1, on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        sub_cat_name = SubCategory1.objects.get(pk=self.subcat_1_id.id).name
+        return f"{sub_cat_name}" if self.subcat_1_id else "Null"
+
+    class Meta:
+        db_table = "subcategory_1_double"
+        verbose_name_plural = "subcategory_1_double"
+
+
+class Subcat1AccessoryJoin(models.Model):
+
+    subcat_1_id = models.ForeignKey(
+        SubCategory1, on_delete=models.CASCADE, related_name="accessory_join",
+        blank=False,
+    )
+    accessory_id = models.ForeignKey(
+        Subcat1Double, on_delete=models.CASCADE, related_name="category_join",
+        blank=False, to_field="subcat_1_id"
+    )
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    def __str__(self):
+        return f"Accessory for {self.subcat_1_id.name}" if self.subcat_1_id else "Null"
+
+    class Meta:
+        db_table = "subcategory_1_accessories"
+        verbose_name_plural = "subcategory_1_accessories"
+
+
+class Subcat1BoughtTogetherJoin(models.Model):
+    subcat_1_id = models.ForeignKey(
+        SubCategory1, on_delete=models.CASCADE, related_name="bought_together_join",
+        blank=False,
+    )
+    bought_together_id = models.ForeignKey(
+        Subcat1Double, on_delete=models.CASCADE, related_name="bought_join",
+        blank=False, to_field="subcat_1_id"
+    )
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    def __str__(self):
+        return f"Frequently bought together for {self.subcat_1_id.name}" if self.subcat_1_id else "Null"
+
+    class Meta:
+        db_table = "subcategory_1_bought_together"
+        verbose_name_plural = "subcategory_1_bought_together"
+
+
+# Main Features for SubCategory1
+class SubCategory1MainFeatures(models.Model):
+    subcat_1_id = models.OneToOneField(
+        SubCategory1, on_delete=models.CASCADE, related_name="main_features"
+    )
+    features = models.JSONField(default=json_default)
+
+
+# Subcategory 2
 class SubCategory2(models.Model):
 
-    subcat_id = models.ForeignKey(
+    subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.SET_NULL, related_name="subcategory_2", null=True
     )
     name = models.CharField(max_length=100, unique=True, null=False)
@@ -125,6 +201,67 @@ class SubCategory2(models.Model):
     class Meta:
         db_table = "subcategory_2"
         verbose_name_plural = "subcategories_2"
+
+
+class Subcat2Double(models.Model):
+    subcat_2_id = models.OneToOneField(
+        SubCategory2, on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        sub_cat_name = SubCategory2.objects.get(pk=self.subcat_2_id.id).name
+        return f"{sub_cat_name}" if self.subcat_2_id else "Null"
+
+    class Meta:
+        db_table = "subcategory_2_double"
+        verbose_name_plural = "subcategory_2_double"
+
+
+class Subcat2AccessoryJoin(models.Model):
+
+    subcat_2_id = models.ForeignKey(
+        SubCategory2, on_delete=models.CASCADE, related_name="accessory_join",
+        blank=False,
+    )
+    accessory_id = models.ForeignKey(
+        Subcat2Double, on_delete=models.CASCADE, related_name="category_join",
+        blank=False, to_field="subcat_2_id"
+    )
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    def __str__(self):
+        return f"Accessory for {self.subcat_2_id.name}" if self.subcat_2_id else "Null"
+
+    class Meta:
+        db_table = "subcategory_2_accessories"
+        verbose_name_plural = "subcategory_2_accessories"
+
+
+class Subcat2BoughtTogetherJoin(models.Model):
+    subcat_2_id = models.ForeignKey(
+        SubCategory2, on_delete=models.CASCADE, related_name="bought_together_join",
+        blank=False,
+    )
+    bought_together_id = models.ForeignKey(
+        Subcat2Double, on_delete=models.CASCADE, related_name="bought_join",
+        blank=False, to_field="subcat_2_id"
+    )
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    def __str__(self):
+        return f"Frequently bought together for {self.subcat_2_id.name}" if self.subcat_2_id else "Null"
+
+    class Meta:
+        db_table = "subcategory_2_bought_together"
+        verbose_name_plural = "subcategory_2_bought_together"
+
+
+# Main Features for SubCategory2
+class SubCategory2MainFeatures(models.Model):
+    subcat_2_id = models.OneToOneField(
+        SubCategory2, on_delete=models.CASCADE, related_name="main_features"
+    )
+    features = models.JSONField(default=json_default)
 
 
 class Brand(models.Model):
