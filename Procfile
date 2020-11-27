@@ -1,1 +1,1 @@
-web: gunicorn fotocruise_backend.wsgi --log-file -
+web: gunicorn online_store.wsgi --log-file -
