@@ -4,7 +4,7 @@ from decouple import Csv
 from dj_database_url import parse as dburl
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv)
 
