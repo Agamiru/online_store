@@ -15,7 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.http.response import HttpResponse
+
+from rest_framework import status
+
+
+def index(request):
+    return HttpResponse("<b>Welcome to the backend<b>", status=status.HTTP_200_OK)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", index, name="index"),
 ]
