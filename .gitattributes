@@ -1,0 +1,3 @@
+.gitignore merge=ours
+manage.py merge=ours
+online_store/wsgi.py merge=ours

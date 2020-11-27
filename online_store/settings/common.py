@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 
+from decouple import config
+import django_heroku
+from dj_database_url import parse as dburl      # Used in staging.py and production.py
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -20,12 +24,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8pvv!aet70eohc4-9mo8ggckq!lqkkal-z2brhd+bt^n68)-y4'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+SECRET_KEY = config("SECRET_KEY")
 
 
 # Application definition
@@ -74,20 +73,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'online_store.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'store_db',
-        'USER': 'postgres',
-        'PASSWORD': 'aGAMIRu',
-        'HOST': 'localhost',
-        'PORT': '5432'
-
-    }
-}
 
 
 # Password validation
@@ -129,3 +115,7 @@ USE_TZ = True
 AUTH_USER_MODEL = "app_admin.User"
 STATIC_URL = '/static/'
 MEDIA_ROOT = 'media'
+
+
+# For settings for Heroku
+django_heroku.settings(locals())

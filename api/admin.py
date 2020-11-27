@@ -104,7 +104,6 @@ class CommaNewLineSeparatedField(JSONField):
         return json.dumps(value, cls=self.encoder)
 
 
-
 class ProductForm(forms.ModelForm):
 
     specs = SpecsField()
