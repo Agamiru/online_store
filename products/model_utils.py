@@ -1,5 +1,7 @@
 from django.db.models import ObjectDoesNotExist as doesnt_exist
 from typing import List
+from .utils import string_list_to_list
+import json
 
 
 # Todo: Write tests for this
@@ -11,14 +13,16 @@ class GetMainFeatures:
         self.features_list = None
         self.values_list = []
         self.features_dict = None   # Final product
-        self.skipped: List[int] = []   # List of index of skipped features
+        self.skipped: List[int] = []   # List of index of skipped _features
         self.errors = []
 
     def __call__(self, *args, **kwargs):
         self._features()
 
     def _features(self):
-        specs = self.product_instance.specs
+        specs = self.product_instance.specs     # returns a str
+        json_specs = json.loads(specs)      # converts string to dict
+        print(f"specs: {type(json_specs)}\n")
         skipped: List[int] = []
         self.features_dict = {}
         self.get_features_list()
@@ -27,10 +31,10 @@ class GetMainFeatures:
         count = 0
         for feat in self.features_list:
             try:
-                self.features_dict.update({feat: specs[feat]})
-                self.values_list.append(specs[feat])
+                self.features_dict.update({feat: json_specs[feat]})
+                self.values_list.append(json_specs[feat])
                 count += 1
-            # If for some reason specs has no such features
+            # If for some reason specs has no such _features
             except KeyError:
                 skipped.append(count)
                 count += 1
@@ -40,18 +44,24 @@ class GetMainFeatures:
             print(f"Skipped {len(skipped)} items")
 
     def get_features_list(self):
+        """
+        Updates self.features_list, self.errors and self.has_features
+        """
         approp_cat_instance = self.return_appropriate_category_instance()
+        print(f"approp_cat_instance: {approp_cat_instance}\n")
         # Backward relationship
         try:
-            features = approp_cat_instance.main_features._features
+            features = approp_cat_instance.main_features._features   # str
+            print(f"_features: {features}\n")
             self.has_features = True
-            print(f"features: {type(features)}\n")
-            print(f"features: {features}")
-            self.features_list = features
-        # Category has no features
+            print(f"_features: {type(features)}\n")
+            print(f"_features: {features}")
+            self.features_list = string_list_to_list(features)
+        # Category has no _features
         except (doesnt_exist, AttributeError) as e:
             cat_name = approp_cat_instance.__class__.__name__
             self.errors.append({cat_name: e})
+            print(f"errors: {self.errors}")
 
     def return_appropriate_category_instance(self):
         if self.product_instance.subcat_2_id:

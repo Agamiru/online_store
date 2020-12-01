@@ -344,14 +344,14 @@ class AbstractModel(models.Model):
 
 # class MainFeatures(AbstractModel):
 #
-#     features = models.JSONField(default=json_default)
+#     _features = models.JSONField(default=json_default)
 #
 #     def __str__(self):
 #         cat_name = self.return_appropriate_category()
 #         return f"Main Features for '{cat_name}'"
 #
 #     class Meta:
-#         db_table = "features"
+#         db_table = "_features"
 
 
 # Todo: Create an admin page for adding products
