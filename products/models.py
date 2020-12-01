@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist as doesnt_exist
-from .model_utils import *
+
 # Create your models here.
 import json
 from typing import List, Tuple
@@ -36,6 +36,7 @@ def choices_getter(model, name_field: str = "name") -> List[Tuple[str, str]]:
 class Category(models.Model):
 
     name = models.CharField(max_length=100, unique=True, null=False)
+    alias = models.JSONField(default=json_default)
 
     def __str__(self):
         return f"{self.name}"
@@ -109,6 +110,12 @@ class CategoryMainFeatures(models.Model):
     )
     features = models.JSONField(default=json_default)
 
+    def __str__(self):
+        return f"{self.cat_id.name} Main Features"
+
+    class Meta:
+        db_table = "category_main_features"
+
 
 # Subcategory 1
 class SubCategory1(models.Model):
@@ -117,6 +124,7 @@ class SubCategory1(models.Model):
         Category, on_delete=models.SET_NULL, related_name="subcategory_1", null=True
     )
     name = models.CharField(max_length=100, unique=True, null=False)
+    alias = models.JSONField(default=json_default)
 
     def __str__(self):
         return f"{self.name}"
@@ -186,6 +194,12 @@ class SubCategory1MainFeatures(models.Model):
     )
     features = models.JSONField(default=json_default)
 
+    def __str__(self):
+        return f"{self.subcat_1_id.name} Main Features"
+
+    class Meta:
+        db_table = "Subcategory1_main_features"
+
 
 # Subcategory 2
 class SubCategory2(models.Model):
@@ -194,6 +208,7 @@ class SubCategory2(models.Model):
         SubCategory1, on_delete=models.SET_NULL, related_name="subcategory_2", null=True
     )
     name = models.CharField(max_length=100, unique=True, null=False)
+    alias = models.JSONField(default=json_default)
 
     def __str__(self):
         return f"{self.name}"
@@ -263,6 +278,12 @@ class SubCategory2MainFeatures(models.Model):
     )
     features = models.JSONField(default=json_default)
 
+    def __str__(self):
+        return f"{self.subcat_2_id.name} Main Features"
+
+    class Meta:
+        db_table = "Subcategory2_main_features"
+
 
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True, default="Generic")
@@ -284,6 +305,9 @@ class ModelName(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    class Meta:
+        db_table = "model_name"
+
 
 class AbstractModel(models.Model):
 
@@ -297,6 +321,8 @@ class AbstractModel(models.Model):
     subcat_2_id = models.ForeignKey(
         SubCategory2, models.SET_NULL, null=True, blank=True,
     )
+
+    comes_in_pairs = models.BooleanField(default=False)
 
     def return_appropriate_category(self):
         try:
@@ -330,11 +356,6 @@ class AbstractModel(models.Model):
 
 # Todo: Create an admin page for adding products
 class Product(AbstractModel):
-
-    # main_features = models.OneToOneField(
-    #     MainFeatures, on_delete=models.SET_NULL,
-    #     related_name="product", null=True, blank=True,
-    # )
 
     brand = models.ForeignKey(
         Brand, on_delete=models.SET_NULL, related_name="product",
@@ -377,4 +398,5 @@ class Product(AbstractModel):
 
     class Meta:
         db_table = "products"
+
 

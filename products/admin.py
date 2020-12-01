@@ -9,14 +9,14 @@ from .models import (
 )
 
 from django import forms
-from django.forms.widgets import TextInput
+from django.forms.widgets import TextInput, Textarea
 from django.forms.fields import JSONField, JSONString
 from django.core.exceptions import ValidationError, ObjectDoesNotExist as doesntExist
 from django.contrib import messages
 import zlib
 from django.forms.models import BaseModelForm, ModelFormMetaclass
 
-from app_admin.utils import BhphotovideoTableConverter
+from .utils import BhphotovideoTableConverter
 import json
 from typing import List, Tuple, Any
 
@@ -55,7 +55,7 @@ class SpecsField(JSONField):
     def prepare_value(self, value):
         if value == "null":
             return json.dumps(None, cls=self.encoder)
-        # Todo: Calling super here brings funny behaviour, dont know why
+        # Todo: Calling super here brings funny behaviour, don't know why
         # super().prepare_value(value)
         if isinstance(value, forms.fields.InvalidJSONInput):
             return value
@@ -63,9 +63,8 @@ class SpecsField(JSONField):
 
 
 class CommaNewLineSeparatedField(JSONField):
-    widget = TextInput(attrs={
+    widget = Textarea(attrs={
         "placeholder": "Comma or new line separated values",
-        "size": "40",
     })
 
     def to_python(self, value):
@@ -122,26 +121,30 @@ class ProductForm(forms.ModelForm):
 
         try:
             obj = Product.objects.get(pk=id)    # Try fetching existing object
-            model_specs = obj.specs      # Existing Object specs
-            model_itb = obj.in_the_box      # Existing Object in_the_box
+            instance_specs = obj.specs      # Existing Object specs
+            instance_itb = obj.in_the_box      # Existing Object in_the_box
             if specs == "in_database":
                 # Sometimes, artifacts are introduced in the field input while displaying
                 # existing values (bound_data).
-                # It's best to use values from the model itself while saving to avoid this.
-                self.cleaned_data["specs"] = model_specs
+                # It's best to use values from the model itself while saving to avoid this
+                self.cleaned_data["specs"] = instance_specs
 
-                model_specs_pd = model_specs.get("Box Dimensions (LxWxH)")
-                model_specs_pd = model_specs_pd[0] if model_specs_pd else None
-                model_specs_w = model_specs.get("Package Weight")
-                model_specs_w = model_specs_w[0] if model_specs_w else None
+                # Sets appropriate package dimensions and weight using existing specs data
+                instance_specs_pd = instance_specs.get("Box Dimensions (LxWxH)")
+                instance_specs_pd = instance_specs_pd[0] if instance_specs_pd else None
+                instance_specs_w = instance_specs.get("Package Weight")
+                instance_specs_w = instance_specs_w[0] if instance_specs_w else None
 
-                if not pd and model_specs_pd is not None:
-                    self.cleaned_data["package_dimensions"] = model_specs_pd
-                if not w and model_specs_w is not None:
-                    self.cleaned_data["weight"] = model_specs_w
+                # In case package dimension and weight fields are empty during updating
+                # use values from existing specs
+                if not pd and instance_specs_pd is not None:
+                    self.cleaned_data["package_dimensions"] = instance_specs_pd
+                if not w and instance_specs_w is not None:
+                    self.cleaned_data["weight"] = instance_specs_w
 
+            # Use existing objects itb if available
             if self.cleaned_data.get("in_the_box") == "in_database":
-                self.cleaned_data["in_the_box"] = model_itb
+                self.cleaned_data["in_the_box"] = instance_itb
 
         except doesntExist:    # For newly saved products
 
@@ -154,7 +157,7 @@ class ProductForm(forms.ModelForm):
             # Key error in case specs has no package dimensions
             # Type error in case "null" is returned as string indices must be integers
             except (KeyError, TypeError):
-                self.cleaned_data["specs"] = None
+                # self.cleaned_data["specs"] = None
                 pass
                 # Todo: Should display a message notifying the user there are no package_dimensions
                 # self.add_error("package_dimensions", f"Specs has no {e}")
@@ -178,6 +181,7 @@ class ProductForm(forms.ModelForm):
 
 # Abstract Model Form Maker with custom methods
 # To be inherited by Categories and Subcategories
+# Contains logic about category and subcategory inheritance
 class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):
 
     def clean(self):
@@ -262,6 +266,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
 
+    # Save double after Category is saved
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         acc_instance = CategoryDouble.objects.create(cat_id=obj)
@@ -319,6 +324,7 @@ class CategoryMainFeaturesAdmin(admin.ModelAdmin):
 @admin.register(SubCategory1)
 class Subcat1Admin(admin.ModelAdmin):
 
+    # Save double after Subcat1 is saved
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         acc_instance = Subcat1Double.objects.create(subcat_1_id=obj)
@@ -373,6 +379,7 @@ class Subcategory1MainFeaturesAdmin(admin.ModelAdmin):
 @admin.register(SubCategory2)
 class Subcat2Admin(admin.ModelAdmin):
 
+    # Save double after Subcat2 is saved
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         acc_instance = Subcat2Double.objects.create(subcat_1_id=obj)
@@ -437,4 +444,5 @@ admin.site.register(ModelName)
 # admin.site.register(SubCategory2, Subcat2Admin)
 # admin.site.register(Subcat2AccessoryJoin, Subcat2AccessoryJoinAdmin)
 # admin.site.register(Subcat2BoughtTogetherJoin, Subcat2BoughtTogetherJoinAdmin)
+
 
