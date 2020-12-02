@@ -13,13 +13,13 @@ class GetMainFeatures:
         self.features_list = None
         self.values_list = []
         self.features_dict = None   # Final product
-        self.skipped: List[int] = []   # List of index of skipped _features
+        self.skipped: List[int] = []   # List of index of skipped features
         self.errors = []
 
-    def __call__(self, *args, **kwargs):
-        self._features()
+    # def __call__(self, *args, **kwargs):
+    #     self.features()
 
-    def _features(self):
+    def features(self):
         specs = self.product_instance.specs     # returns a str
         json_specs = json.loads(specs)      # converts string to dict
         print(f"specs: {type(json_specs)}\n")
@@ -34,7 +34,7 @@ class GetMainFeatures:
                 self.features_dict.update({feat: json_specs[feat]})
                 self.values_list.append(json_specs[feat])
                 count += 1
-            # If for some reason specs has no such _features
+            # If for some reason specs has no such features
             except KeyError:
                 skipped.append(count)
                 count += 1
@@ -48,20 +48,15 @@ class GetMainFeatures:
         Updates self.features_list, self.errors and self.has_features
         """
         approp_cat_instance = self.return_appropriate_category_instance()
-        print(f"approp_cat_instance: {approp_cat_instance}\n")
         # Backward relationship
         try:
-            features = approp_cat_instance.main_features._features   # str
-            print(f"_features: {features}\n")
+            features = approp_cat_instance.main_features.features   # str
             self.has_features = True
-            print(f"_features: {type(features)}\n")
-            print(f"_features: {features}")
             self.features_list = string_list_to_list(features)
-        # Category has no _features
+        # Category has no features
         except (doesnt_exist, AttributeError) as e:
             cat_name = approp_cat_instance.__class__.__name__
             self.errors.append({cat_name: e})
-            print(f"errors: {self.errors}")
 
     def return_appropriate_category_instance(self):
         if self.product_instance.subcat_2_id:
@@ -83,7 +78,7 @@ class GetMainFeatures:
             count += 1
             if count > 1:
                 return ""
-            self._features()
+            self.features()
 
         final_string = ""
         skipped_count = 0   # Count to check for skipped items
