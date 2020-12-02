@@ -16,3 +16,15 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 DATABASES = {
     'default': config("DATABASE_URL", cast=dburl)
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': config("LOCAL_DB_NAME"),
+#         'USER': config("LOCAL_DB_USER"),
+#         'PASSWORD': config("LOCAL_DB_PASSWORD"),
+#         'HOST': config("LOCAL_DB_HOST"),
+#         'PORT': config("LOCAL_DB_PORT", default="")
+#
+#     }
+# }
