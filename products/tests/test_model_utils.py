@@ -1,35 +1,7 @@
-import json
-
 from django.test import TestCase
 
 from ..utils.test_utils import CreateProduct
 from ..utils.model_utils import GetMainFeatures as gmf
-
-from ..exceptions import ImproperlyConfigured
-
-
-
-# class TestModelUtils(TestCase):
-# #
-# #     def setUp(self) -> None:
-# #         cat_obj, created = Category.objects.get_or_create(
-# #             name="Midi Keyboard",
-# #             # Both use ListJ
-# #             alias=["midi_controller", "controller"],
-# #             main_features=["octaves", "transpose", "pitch bend"]
-# #         )
-# #         cat_obj_none, created = Category.objects.get_or_create(
-# #             name="Amplifiers",
-# #             # Both use ListJ
-# #             alias=json.dumps(None),
-# #             main_features=json.dumps(None)
-# #         )
-# #         self.cat_obj = cat_obj
-# #         self.cat_obj_none = cat_obj_none
-# #
-# #     def test_ListJSONField(self):
-# #         self.assertTrue(isinstance(self.cat_obj.alias, list))
-# #         self.assertEqual("midi_controller", self.cat_obj.alias[0])
 
 
 class TestGetMainFeatures(TestCase):
