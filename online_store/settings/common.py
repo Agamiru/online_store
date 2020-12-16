@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'app_admin.apps.AppAdminConfig',
-    'products',
+    'products.apps.ProductsConfig',
+    'telegram_app.apps.TelegramAppConfig',
 ]
 
 MIDDLEWARE = [

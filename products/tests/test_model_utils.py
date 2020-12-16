@@ -1,7 +1,12 @@
 from django.test import TestCase
+from django.db.models import ForeignKey
+from django.core.exceptions import ValidationError
 
-from ..utils.test_utils import CreateProduct
+from ..utils.test_utils import CreateProduct, SubCategory1
 from ..utils.model_utils import GetMainFeatures as gmf
+from ..utils.model_utils import CrossModelUniqueNameValidator
+from ..models import UniqueCategory
+from django.forms import models
 
 
 class TestGetMainFeatures(TestCase):
@@ -43,6 +48,31 @@ class TestGetMainFeatures(TestCase):
             self.product.subcat_2_obj
         )
 
+    def test_specs_key_switcher(self):
+        specs = {
+            "key": ["Really dope stuff"],
+            "midi": ["Nice Midi"], "fishes": ["Swim a lot"],
+            "world": ["Messed up"], "os": ["Nice os", "Good os", "Lovely Os"]
+        }
+        main_f = [
+            "Keyboard", "MIDI Control Surfaces", "OS Compatibility"
+        ]
+        alias_f = ["key", "midi", "os"]
+        # Create product_instance class
+        prod_inst = type("prod_inst", (), {"specs": specs, "features_alias": alias_f})
+        # Create category class
+        approp_cat = type("approp_cat", (), {"main_features": main_f})
+        main_f_obj = gmf(prod_inst)
+        main_f_obj.specs_key_switcher(approp_cat)
+        self.assertEqual(
+            main_f_obj.product_instance.specs["Keyboard"],
+            ["Really dope stuff"]
+        )
+        self.assertEqual(
+            main_f_obj.product_instance.specs["OS Compatibility"],
+            ["Nice os", "Good os", "Lovely Os"]
+        )
+
     def test_features(self):
         cat_kwargs = {
             "name": "Midi Keyboard",
@@ -71,20 +101,72 @@ class TestGetMainFeatures(TestCase):
         }
         self.product.create_products_w_defaults(cat_kwargs, "M-Audio")
         self.product.model_name(brand_id=self.product.brand_obj, name="Rockstar")
+        self.product.specs_from_bhpv(False)
         self.product.features_alias(["key", "midi", "os"])
         self.product.kwargs["specs"] = specs
-        self.product.specs_from_bhpv(False)
         self.product.create_product()
         main_f_obj = gmf(self.product.prod_instance)
+
         print(f"features dict:\n{main_f_obj.to_string()}\n")
         self.assertEqual(
             main_f_obj.features_dict.get("OS Compatibility"),
             specs.get("os")
         )
 
+    def test_get_main_features_w_all_invalid_keys(self):
+        cat_kwargs = {
+            "name": "M Keyboard",
+            "main_features": ["shell", "camp", "koun"]
+        }
+        self.product.create_products_w_defaults(cat_kwargs, "Motu")
+        main_f_obj = gmf(self.product.prod_instance)
+        main_f_obj.features()
+        print(f"features dict:\n{main_f_obj.to_string()}\n")
+        self.assertEqual(len(main_f_obj.skipped), 3)
+
 
     # def test_print_specs(self):
     #     self.product.print_specs()
+
+
+class FakeModelForm(models.ModelForm):
+    class Meta:
+        exclude = ["id"]
+        model = SubCategory1
+
+
+class TestCrossModelUniqueNameValidator(TestCase):
+
+    def setUp(self) -> None:
+        self.prod = CreateProduct()
+
+    def test_cross_model_unique_name_validator(self):
+        cat_kwargs = {"name": "M Keyboard", "main_features": ["shell"]}
+        self.prod.cat_id(**cat_kwargs)
+        # Test validator in isolation
+        validator = CrossModelUniqueNameValidator(UniqueCategory)
+        self.assertRaises(ValidationError, validator, "M Keyboard")
+        # Test validator in model
+        cat_kwargs["cat_id"] = self.prod.cat_obj
+        cat_kwargs["alias"] = ["koun"]
+        self.assertRaises(
+            ValidationError,
+            self.prod.subcat_1_id, **cat_kwargs
+        )
+        # Test validator in model form
+        form_instance = FakeModelForm(data=cat_kwargs)
+        self.assertFalse(form_instance.is_valid())
+        self.assertEqual(
+            "Category object with name 'M Keyboard' already exists",
+            form_instance.errors.get("name")[0]
+        )
+
+
+
+
+
+
+
 
 
 

@@ -5,6 +5,8 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist as doesnt_exist
 from django.contrib.postgres.fields import ArrayField
 
+from .utils.model_utils import CrossModelUniqueNameValidator
+
 
 def json_default():
     return json.dumps(None)
@@ -17,26 +19,50 @@ def storage_dir(instance, filename) -> str:
     return f"{brand_name}/{model_name}/{filename}"
 
 
-def choices_getter(model, name_field: str = "name") -> List[Tuple[str, str]]:
-    all_objects = model.objects.all()
-    if not all_objects:
-        return [("NONE", "None")]
-    choices_list = []
-    for obj in all_objects:
-        try:
-            choice = getattr(obj, name_field)
-            choices_list.append(choice)
-        except AttributeError:
-            raise AttributeError(f"Your model has no such attribute <{name_field}>")
+class UniqueCategory(models.Model):
+    """
+    Category name should be unique even across different category models,
+    this model is used as a backend for the cross_model_validator (see below)
+    to validate names as unique before saving.
 
-    choices_list = [(choice.upper(), choice.title()) for choice in choices_list]
-    return choices_list
+    A post_save signal has been set up on all category models, to automatically
+    populate this model.
+    """
+    name = models.CharField(max_length=200, unique=True)
+    model_name = models.CharField(max_length=200)
+    cat_id = models.IntegerField(null=False)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        db_table = "unique_category"
+        constraints = [
+            models.UniqueConstraint(name="whatever", fields=["model_name", "cat_id"])
+        ]
 
 
-class Category(models.Model):
-    # Todo: name should also be unique to Category and Subcat2 names, add validator.
+cross_model_validator = CrossModelUniqueNameValidator(UniqueCategory)
 
-    name = models.CharField(max_length=100, unique=True, null=False)
+
+# Abstract model for categories
+class CategoriesAbstractModel(models.Model):
+    def save(self, *args, **kwargs):
+        # When creating model instances from the application or shell, full_clean method
+        # which validates field input is bypassed. This hook ensures it's still checked
+        # before save. For forms, validation will be done twice, small price to pay.
+        cross_model_validator(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
+class Category(CategoriesAbstractModel):
+    name = models.CharField(
+        validators=[cross_model_validator],
+        max_length=100, unique=True, null=False
+    )
     alias = ArrayField(models.CharField(max_length=20, blank=True), default=list)
     main_features = ArrayField(models.CharField(max_length=20, blank=False))
 
@@ -89,13 +115,14 @@ class CategoryBoughtTogetherJoin(models.Model):
 
 
 # Subcategory 1
-class SubCategory1(models.Model):
-    # Todo: name should also be unique to Category and Subcat2 names, add validator.
-
+class SubCategory1(CategoriesAbstractModel):
     cat_id = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name="subcategory_1", null=True
     )
-    name = models.CharField(max_length=100, unique=True, null=False)
+    name = models.CharField(
+        validators=[cross_model_validator],
+        max_length=100, unique=True, null=False
+    )
     alias = ArrayField(models.CharField(max_length=20, blank=True), default=list)
     main_features = ArrayField(models.CharField(max_length=20, blank=True), default=list)
 
@@ -147,13 +174,14 @@ class Subcat1BoughtTogetherJoin(models.Model):
 
 
 # Subcategory 2
-class SubCategory2(models.Model):
-    # Todo: name should also be unique to Category and Subcat1 names, add validator.
-
+class SubCategory2(CategoriesAbstractModel):
     subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.SET_NULL, related_name="subcategory_2", null=True
     )
-    name = models.CharField(max_length=100, unique=True, null=False)
+    name = models.CharField(
+        validators=[cross_model_validator],
+        max_length=100, unique=True, null=False
+    )
     alias = ArrayField(models.CharField(max_length=20, blank=True), default=list)
     main_features = ArrayField(models.CharField(max_length=20, blank=True), default=list)
 
@@ -284,6 +312,7 @@ class Product(AbstractModel):
     package_dimensions = models.CharField(max_length=200, null=True, blank=True,)
     weight = models.CharField(max_length=200, null=True, blank=True,)
     date_created = models.DateTimeField(auto_now=True)
+    # Todo: Enforce during model save.
     # If specs_from_bhpv is False, map these fields
     features_alias = ArrayField(
         models.CharField(max_length=20, blank=False), default=list
@@ -306,6 +335,8 @@ class Product(AbstractModel):
     def __str__(self):
         cat_name = self.return_appropriate_category()
         return f"{self.product_name()} in {cat_name}"
+
+
 
     class Meta:
         db_table = "products"
