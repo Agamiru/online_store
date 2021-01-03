@@ -58,6 +58,18 @@ class CategoriesAbstractModel(models.Model):
         abstract = True
 
 
+# Abstract model for join models
+class ModelJoinAbstractModel(models.Model):
+    """
+    All join models have this field.
+    """
+
+    hash_field = models.IntegerField(blank=True, unique=True)
+
+    class Meta:
+        abstract = True
+
+
 class Category(CategoriesAbstractModel):
     name = models.CharField(
         validators=[cross_model_validator],
@@ -75,7 +87,7 @@ class Category(CategoriesAbstractModel):
 
 
 # Accessories for Categories
-class CategoryAccessoryJoin(models.Model):
+class CategoryAccessoryJoin(ModelJoinAbstractModel):
     cat_id = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="accessory_join",
         blank=False,
@@ -84,7 +96,6 @@ class CategoryAccessoryJoin(models.Model):
         Category, on_delete=models.CASCADE, related_name="category_join",
         blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Accessory for {self.cat_id.name}" if self.cat_id else "Null"
@@ -95,7 +106,7 @@ class CategoryAccessoryJoin(models.Model):
 
 
 # Bought Together for Categories
-class CategoryBoughtTogetherJoin(models.Model):
+class CategoryBoughtTogetherJoin(ModelJoinAbstractModel):
     cat_id = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
@@ -104,7 +115,6 @@ class CategoryBoughtTogetherJoin(models.Model):
         Category, on_delete=models.CASCADE, related_name="bought_join",
         blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Frequently bought together for {self.cat_id.name}" if self.cat_id else "Null"
@@ -134,7 +144,7 @@ class SubCategory1(CategoriesAbstractModel):
         verbose_name_plural = "subcategories_1"
 
 
-class Subcat1AccessoryJoin(models.Model):
+class Subcat1AccessoryJoin(ModelJoinAbstractModel):
 
     subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.CASCADE, related_name="accessory_join",
@@ -144,7 +154,6 @@ class Subcat1AccessoryJoin(models.Model):
         SubCategory1, on_delete=models.CASCADE, related_name="category_join",
         blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Accessory for {self.subcat_1_id.name}" if self.subcat_1_id else "Null"
@@ -154,7 +163,7 @@ class Subcat1AccessoryJoin(models.Model):
         verbose_name_plural = "subcategory_1_accessories"
 
 
-class Subcat1BoughtTogetherJoin(models.Model):
+class Subcat1BoughtTogetherJoin(ModelJoinAbstractModel):
     subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
@@ -163,7 +172,6 @@ class Subcat1BoughtTogetherJoin(models.Model):
         SubCategory1, on_delete=models.CASCADE, related_name="bought_join",
         blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Frequently bought together for {self.subcat_1_id.name}" if self.subcat_1_id else "Null"
@@ -193,7 +201,7 @@ class SubCategory2(CategoriesAbstractModel):
         verbose_name_plural = "subcategories_2"
 
 
-class Subcat2AccessoryJoin(models.Model):
+class Subcat2AccessoryJoin(ModelJoinAbstractModel):
 
     subcat_2_id = models.ForeignKey(
         SubCategory2, on_delete=models.CASCADE, related_name="accessory_join",
@@ -203,7 +211,6 @@ class Subcat2AccessoryJoin(models.Model):
         SubCategory2, on_delete=models.CASCADE, related_name="category_join",
         blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Accessory for {self.subcat_2_id.name}" if self.subcat_2_id else "Null"
@@ -213,7 +220,7 @@ class Subcat2AccessoryJoin(models.Model):
         verbose_name_plural = "subcategory_2_accessories"
 
 
-class Subcat2BoughtTogetherJoin(models.Model):
+class Subcat2BoughtTogetherJoin(ModelJoinAbstractModel):
     subcat_2_id = models.ForeignKey(
         SubCategory2, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
@@ -222,7 +229,6 @@ class Subcat2BoughtTogetherJoin(models.Model):
         SubCategory2, on_delete=models.CASCADE, related_name="bought_join",
         blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Frequently bought together for {self.subcat_2_id.name}" if self.subcat_2_id else "Null"
@@ -256,7 +262,8 @@ class ModelName(models.Model):
         db_table = "model_name"
 
 
-class AbstractModel(models.Model):
+# Abstract model for Products
+class ProductAbstractModel(models.Model):
 
     cat_id = models.ForeignKey(
         Category, models.SET_NULL, null=True,
@@ -290,7 +297,7 @@ class AbstractModel(models.Model):
         abstract = True
 
 
-class Product(AbstractModel):
+class Product(ProductAbstractModel):
 
     brand = models.ForeignKey(
         Brand, on_delete=models.SET_NULL, related_name="product",
@@ -335,8 +342,6 @@ class Product(AbstractModel):
     def __str__(self):
         cat_name = self.return_appropriate_category()
         return f"{self.product_name()} in {cat_name}"
-
-
 
     class Meta:
         db_table = "products"

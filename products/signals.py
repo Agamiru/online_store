@@ -10,7 +10,7 @@ def save_or_update_unique_category(sender, instance, created, **kwargs):
         UniqueCategory.objects.create(name=inst_name, model_name=model_name, cat_id=inst_id)
     else:
         # cat_id and model_name are Unique Together, else might return more than one result
-        # We cannot use inst_name for look up as that might have been updated.
+        # We cannot use only inst_name for look up as that might have been updated.
         unique_obj = UniqueCategory.objects.get(cat_id=inst_id, model_name=model_name)
         if unique_obj.name != inst_name:
             unique_obj.name = inst_name
