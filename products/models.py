@@ -59,15 +59,15 @@ class CategoriesAbstractModel(models.Model):
 
 
 # Abstract model for join models
-class ModelJoinAbstractModel(models.Model):
-    """
-    All join models have this field.
-    """
-
-    hash_field = models.IntegerField(blank=True, unique=True)
-
-    class Meta:
-        abstract = True
+# class ModelJoinAbstractModel(models.Model):
+#     """
+#     All join models have this field.
+#     """
+#
+#     # hash_field = models.IntegerField(blank=True, unique=True)
+#
+#     class Meta:
+#         abstract = True
 
 
 # Category
@@ -88,7 +88,7 @@ class Category(CategoriesAbstractModel):
 
 
 # Accessories for Categories
-class CategoryAccessoryJoin(ModelJoinAbstractModel):
+class CategoryAccessoryJoin(models.Model):
     cat_id = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="accessory_join",
         blank=False,
@@ -104,13 +104,15 @@ class CategoryAccessoryJoin(ModelJoinAbstractModel):
     class Meta:
         db_table = "category_accessories"
         verbose_name_plural = "category_accessories"
-        # constraints = models.UniqueConstraint(
-        #     fields=["subcat_1_id", "accessory_id"], name="cat_acc_join"
-        # )
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cat_id", "accessory_id"], name="cat_acc_join"
+            )
+        ]
 
 
 # Bought Together for Categories
-class CategoryBoughtTogetherJoin(ModelJoinAbstractModel):
+class CategoryBoughtTogetherJoin(models.Model):
     cat_id = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
@@ -126,6 +128,11 @@ class CategoryBoughtTogetherJoin(ModelJoinAbstractModel):
     class Meta:
         db_table = "category_bought_together"
         verbose_name_plural = "category_bought_together"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cat_id", "bought_together_id"], name="cat_b2g_join"
+            )
+        ]
 
 
 # Subcategory 1
@@ -148,7 +155,7 @@ class SubCategory1(CategoriesAbstractModel):
         verbose_name_plural = "subcategories_1"
 
 
-class Subcat1AccessoryJoin(ModelJoinAbstractModel):
+class Subcat1AccessoryJoin(models.Model):
 
     subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.CASCADE, related_name="accessory_join",
@@ -165,9 +172,14 @@ class Subcat1AccessoryJoin(ModelJoinAbstractModel):
     class Meta:
         db_table = "subcategory_1_accessories"
         verbose_name_plural = "subcategory_1_accessories"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_1_id", "accessory_id"], name="subcat1_acc_join"
+            )
+        ]
 
 
-class Subcat1BoughtTogetherJoin(ModelJoinAbstractModel):
+class Subcat1BoughtTogetherJoin(models.Model):
     subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
@@ -183,6 +195,11 @@ class Subcat1BoughtTogetherJoin(ModelJoinAbstractModel):
     class Meta:
         db_table = "subcategory_1_bought_together"
         verbose_name_plural = "subcategory_1_bought_together"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_1_id", "bought_together_id"], name="subcat1_b2g_join"
+            )
+        ]
 
 
 # Subcategory 2
@@ -205,7 +222,7 @@ class SubCategory2(CategoriesAbstractModel):
         verbose_name_plural = "subcategories_2"
 
 
-class Subcat2AccessoryJoin(ModelJoinAbstractModel):
+class Subcat2AccessoryJoin(models.Model):
 
     subcat_2_id = models.ForeignKey(
         SubCategory2, on_delete=models.CASCADE, related_name="accessory_join",
@@ -222,9 +239,14 @@ class Subcat2AccessoryJoin(ModelJoinAbstractModel):
     class Meta:
         db_table = "subcategory_2_accessories"
         verbose_name_plural = "subcategory_2_accessories"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_2_id", "accessory_id"], name="subcat2_acc_join"
+            )
+        ]
 
 
-class Subcat2BoughtTogetherJoin(ModelJoinAbstractModel):
+class Subcat2BoughtTogetherJoin(models.Model):
     subcat_2_id = models.ForeignKey(
         SubCategory2, on_delete=models.CASCADE, related_name="bought_together_join",
         blank=False,
@@ -240,6 +262,11 @@ class Subcat2BoughtTogetherJoin(ModelJoinAbstractModel):
     class Meta:
         db_table = "subcategory_2_bought_together"
         verbose_name_plural = "subcategory_2_bought_together"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_2_id", "bought_together_id"], name="subcat2_b2g_join"
+            )
+        ]
 
 
 class Brand(models.Model):

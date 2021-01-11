@@ -20,6 +20,11 @@ from .utils.admin_utils import (
 
 
 class ProductForm(forms.ModelForm):
+    """
+    Special clean method implemented for product form to auto-fill 'weight'
+    and 'package_dimensions' and also handle other intricacies that could occur
+    while retrieving and saving specs from database.
+    """
 
     specs = FormSpecsField()
     in_the_box = FormCommaNewLineSeparatedField()
@@ -43,7 +48,7 @@ class ProductForm(forms.ModelForm):
             if specs == "in_database":
                 # Sometimes, artifacts are introduced in the field input while displaying
                 # existing values (bound_data).
-                # It's best to use values from the model itself while saving to avoid this
+                # It's best to use values from the instance itself while saving to avoid this
                 self.cleaned_data["specs"] = instance_specs
 
                 # Sets appropriate package dimensions and weight using existing specs data
@@ -53,7 +58,7 @@ class ProductForm(forms.ModelForm):
                 instance_specs_w = instance_specs_w[0] if instance_specs_w else None
 
                 # In case package dimension and weight fields are empty during updating
-                # use values from existing specs
+                # use values from existing specs if available
                 if not pd and instance_specs_pd is not None:
                     self.cleaned_data["package_dimensions"] = instance_specs_pd
                 if not w and instance_specs_w is not None:
@@ -127,9 +132,6 @@ class CategoryAccessoryJoinForm(AbstractJoinForm):
     class Meta:
         model = CategoryAccessoryJoin
         fields = "__all__"
-        widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
-        }
 
 
 class CategoryBoughtTogetherJoinForm(AbstractJoinForm):
@@ -137,20 +139,15 @@ class CategoryBoughtTogetherJoinForm(AbstractJoinForm):
     class Meta:
         model = CategoryBoughtTogetherJoin
         fields = "__all__"
-        widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
-        }
 
 
 @admin.register(CategoryAccessoryJoin)
 class CategoryAccessoryJoinAdmin(admin.ModelAdmin):
-    # list_display = ["cat_id", "accessory_id", "hash_field"]
     form = CategoryAccessoryJoinForm
 
 
 @admin.register(CategoryBoughtTogetherJoin)
 class CategoryBoughtTogetherJoinAdmin(admin.ModelAdmin):
-    # list_display = ["cat_id", "accessory_id", "hash_field"]
     form = CategoryBoughtTogetherJoinForm
 
 
@@ -175,9 +172,6 @@ class Subcat1AccessoryJoinForm(AbstractJoinForm):
     class Meta:
         model = Subcat1AccessoryJoin
         fields = "__all__"
-        widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
-        }
 
 
 class Subcat1BoughtTogetherJoinForm(AbstractJoinForm):
@@ -185,9 +179,7 @@ class Subcat1BoughtTogetherJoinForm(AbstractJoinForm):
     class Meta:
         model = Subcat1BoughtTogetherJoin
         fields = "__all__"
-        widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
-        }
+
 
 
 @admin.register(Subcat1AccessoryJoin)
@@ -221,9 +213,6 @@ class Subcat2AccessoryJoinForm(AbstractJoinForm):
     class Meta:
         model = Subcat2AccessoryJoin
         fields = "__all__"
-        widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
-        }
 
 
 class Subcat2BoughtTogetherJoinForm(AbstractJoinForm):
@@ -231,10 +220,6 @@ class Subcat2BoughtTogetherJoinForm(AbstractJoinForm):
     class Meta:
         model = Subcat2BoughtTogetherJoin
         fields = "__all__"
-        widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
-        }
-
 
 
 @admin.register(Subcat2AccessoryJoin)
@@ -245,7 +230,6 @@ class Subcat2AccessoryJoinAdmin(admin.ModelAdmin):
 @admin.register(Subcat2BoughtTogetherJoin)
 class Subcat2BoughtTogetherJoinAdmin(admin.ModelAdmin):
     form = Subcat2BoughtTogetherJoinForm
-
 
 
 admin.site.register(Brand)

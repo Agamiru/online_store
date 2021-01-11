@@ -60,10 +60,8 @@ class TestGetMainFeatures(TestCase):
         alias_f = ["key", "midi", "os"]
         # Create product_instance class
         prod_inst = type("prod_inst", (), {"specs": specs, "features_alias": alias_f})
-        # Create category class
-        approp_cat = type("approp_cat", (), {"main_features": main_f})
         main_f_obj = gmf(prod_inst)
-        main_f_obj.specs_key_switcher(approp_cat)
+        main_f_obj.specs_key_switcher(main_f, alias_f)
         self.assertEqual(
             main_f_obj.product_instance.specs["Keyboard"],
             ["Really dope stuff"]
@@ -71,6 +69,32 @@ class TestGetMainFeatures(TestCase):
         self.assertEqual(
             main_f_obj.product_instance.specs["OS Compatibility"],
             ["Nice os", "Good os", "Lovely Os"]
+        )
+
+    def test_set_custom_alias(self):
+        specs = {
+            "key": ["Really dope stuff"],
+            "midi": ["Nice Midi"], "fishes": ["Swim a lot"],
+            "world": ["Messed up"], "os": ["Nice os", "Good os", "Lovely Os"]
+        }
+        main_f = [
+            "Keyboard", "MIDI Control Surfaces", "OS Compatibility"
+        ]
+        alias_f = ["key", "midi", "os"]
+        # Create product_instance class
+        prod_inst = type("prod_inst", (), {"specs": specs, "features_alias": alias_f, "specs_from_bhpv": False})
+        approp_cat = type("approp_cat", (), {"main_features": main_f})
+        # Instantiate GMF class with custom_alias list
+        main_f_obj = gmf(prod_inst, ["shell", "camp", "owerri"])
+        # main_f_obj.features_list = main_f       # Bypass set_features_list
+        main_f_obj.return_appropriate_category_instance = lambda: approp_cat    # set callable
+        self.assertEqual(main_f_obj.return_appropriate_category_instance(), approp_cat)
+        main_f_obj.final()
+        self.assertEqual(
+            main_f_obj.product_instance.specs["shell"], ['Really dope stuff']
+        )
+        self.assertEqual(
+            main_f_obj.product_instance.specs["owerri"], ['Nice os', 'Good os', 'Lovely Os']
         )
 
     def test_features(self):

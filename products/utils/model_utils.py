@@ -47,6 +47,8 @@ class CrossModelUniqueNameValidator:
         )
 
 
+# Todo: Add a hook for changing the final features keys to custom ones
+# Todo: This hook might be unique to this class or might be persisted to db.
 class GetMainFeatures:
     """
     Uses the main_features attribute of different product categories
@@ -56,8 +58,9 @@ class GetMainFeatures:
     warn the user.
     """
 
-    def __init__(self, product_instance):
+    def __init__(self, product_instance, custom_alias: list = None):
         self.product_instance = product_instance
+        self.custom_alias = custom_alias
         self.has_features = False
         self.features_list = None
         self.values_list = []
@@ -74,6 +77,8 @@ class GetMainFeatures:
             if count > 1:
                 return {}
             self.features()
+        if self.custom_alias:
+            return self.set_custom_alias(self.custom_alias)
         return self.features_dict
 
     # Refactoring this function causes dynamic references
@@ -99,16 +104,24 @@ class GetMainFeatures:
         if skipped:
             self.skipped = skipped
 
+    def set_custom_alias(self, custom_alias: list):
+        self.specs_key_switcher(
+            custom_alias, self.features_list, self.features_dict
+        )
+        return self.product_instance.specs
+
     def set_features_list(self):
         """
         Sets features list which will be used to create features_dict.
         """
         approp_cat = self.return_appropriate_category_instance()
         if not self.product_instance.specs_from_bhpv:
-            self.specs_key_switcher(approp_cat)
+            main_f = approp_cat.main_features
+            alias_f = self.product_instance.features_alias
+            self.specs_key_switcher(main_f, alias_f)
         self.features_list = approp_cat.main_features
 
-    def specs_key_switcher(self, approp_cat):
+    def specs_key_switcher(self, main_f, alias_f, specs=None):
         """
         In the case of products with features_alias (i.e. specs_from_bhpv = False),
         format the main_features specs to use the keys provided in the
@@ -116,12 +129,11 @@ class GetMainFeatures:
 
         It will skip missing key_values where necessary.
         """
-        specs = self.product_instance.specs
-        main_f = approp_cat.main_features
-        alias_f = self.product_instance.features_alias
         assert len(main_f) == len(alias_f), "Lists must be of equal lengths"
-        count = 0
+
+        specs = self.product_instance.specs if specs is None else specs
         new_specs, specs_keys = {}, specs.keys()
+        count = 0
         for feature in alias_f:
             if feature in specs_keys:
                 new_specs[main_f[count]] = specs.get(feature)

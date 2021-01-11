@@ -93,7 +93,7 @@ class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):
         first_field_name, second_field_name = self.get_field_names()
 
         obj_1 = self.cleaned_data[first_field_name]  # Category or Subcategory Object
-        obj_2 = self.cleaned_data[second_field_name]  # Category or Subcategory Object Double
+        obj_2 = self.cleaned_data[second_field_name]  # Category or Subcategory Object
 
         cat_id_1, cat_id_2 = obj_1.id, obj_2.id    # Category id pair
 
@@ -101,20 +101,13 @@ class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):
             self.add_error(
                 f"{second_field_name}", f"{first_field_name} & {second_field_name} cannot have the same values"
             )
-
-        hash_value = f"{cat_id_1}{cat_id_2}"
-
-        # Create a unique hash for the combination
-        self.cleaned_data["hash_field"] = zlib.adler32(bytes(hash_value, encoding="utf-8"))
-        print(f"hash_field: {self.cleaned_data['hash_field']}")
-
         return self.cleaned_data
 
     # Get the two important model field names
     def get_field_names(self):     # Tuple[str, str]
-        # Actually third and fourth field names considering the index/id
-        # field and hash_field, but for readability let it be first and second
-        first_field_name = self._meta.model()._meta.fields[2].name
-        second_field_name = self._meta.model()._meta.fields[3].name
+        # Actually second and third field names considering the index/id
+        # field, but for readability let it be first and second
+        first_field_name = self._meta.model()._meta.fields[1].name
+        second_field_name = self._meta.model()._meta.fields[2].name
 
         return first_field_name, second_field_name
