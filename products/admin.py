@@ -23,20 +23,21 @@ class ProductForm(forms.ModelForm):
 
     specs = FormSpecsField()
     in_the_box = FormCommaNewLineSeparatedField()
+    features_alias = FormCommaNewLineSeparatedField()
 
     def clean(self):
         self._validate_unique = True
-        specs = self.cleaned_data.get("specs")  # Can be "in_database", json or "null"
+        specs = self.cleaned_data.get("specs")  # Can be "in_database", json or None
 
         if not specs:       # Ideally, field validations should have checked for this already
             raise ValidationError("This field receives 'None' as value")
 
-        id = self.instance.id
+        id_ = self.instance.id
         pd = self.cleaned_data.get("package_dimensions")  # Package Dimensions
         w = self.cleaned_data.get("weight")     # Weight
 
         try:
-            obj = Product.objects.get(pk=id)    # Try fetching existing object
+            obj = Product.objects.get(pk=id_)    # Try fetching existing object
             instance_specs = obj.specs      # Existing Object specs
             instance_itb = obj.in_the_box      # Existing Object in_the_box
             if specs == "in_database":
@@ -63,7 +64,6 @@ class ProductForm(forms.ModelForm):
                 self.cleaned_data["in_the_box"] = instance_itb
 
         except doesntExist:    # For newly saved products
-
             try:
                 package_dims = specs["Box Dimensions (LxWxH)"]
                 # Use filled package dimensions if available, else take from specs
@@ -72,9 +72,10 @@ class ProductForm(forms.ModelForm):
 
             # Key error in case specs has no package dimensions
             # Type error in case "null" is returned as string indices must be integers
-            except (KeyError, TypeError):
+            except (KeyError, TypeError, IndexError) as e:
                 # self.cleaned_data["specs"] = None
                 pass
+                self.add_error("package_dimensions", f"No package dimensions provided for reason '{e.__str__()}'")
                 # Todo: Should display a message notifying the user there are no package_dimensions
                 # self.add_error("package_dimensions", f"Specs has no {e}")
 
@@ -83,7 +84,8 @@ class ProductForm(forms.ModelForm):
                 # Confirm weight from spec are same as filled, else use weight from specs
                 if not w:
                     self.cleaned_data["weight"] = weight[0]
-            except (KeyError, TypeError):
+            except (KeyError, TypeError, IndexError) as e:
+                self.add_error("weight", f"No weight provided for reason '{e.__str__()}'")
                 pass
                 # Todo: Should display a message notifying the user there is no weight
                 # self.add_error("weight", f"Specs has no {e}")
@@ -126,7 +128,7 @@ class CategoryAccessoryJoinForm(AbstractJoinForm):
         model = CategoryAccessoryJoin
         fields = "__all__"
         widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
         }
 
 
@@ -136,7 +138,7 @@ class CategoryBoughtTogetherJoinForm(AbstractJoinForm):
         model = CategoryBoughtTogetherJoin
         fields = "__all__"
         widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
         }
 
 
@@ -174,7 +176,7 @@ class Subcat1AccessoryJoinForm(AbstractJoinForm):
         model = Subcat1AccessoryJoin
         fields = "__all__"
         widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
         }
 
 
@@ -184,7 +186,7 @@ class Subcat1BoughtTogetherJoinForm(AbstractJoinForm):
         model = Subcat1BoughtTogetherJoin
         fields = "__all__"
         widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
         }
 
 
@@ -220,7 +222,7 @@ class Subcat2AccessoryJoinForm(AbstractJoinForm):
         model = Subcat2AccessoryJoin
         fields = "__all__"
         widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
         }
 
 
@@ -230,8 +232,9 @@ class Subcat2BoughtTogetherJoinForm(AbstractJoinForm):
         model = Subcat2BoughtTogetherJoin
         fields = "__all__"
         widgets = {
-            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "disabled": True})
+            "hash_field": TextInput(attrs={"placeholder": "Do not fill", "hidden": True})
         }
+
 
 
 @admin.register(Subcat2AccessoryJoin)

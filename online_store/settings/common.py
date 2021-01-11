@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'common_app',
     'app_admin.apps.AppAdminConfig',
     'products.apps.ProductsConfig',
     'telegram_app.apps.TelegramAppConfig',

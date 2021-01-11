@@ -1,3 +1,5 @@
+from django.db.models import ObjectDoesNotExist as doesnt_exist
+
 from .models import UniqueCategory
 
 
@@ -20,7 +22,9 @@ def save_or_update_unique_category(sender, instance, created, **kwargs):
 # For post_delete signals
 def delete_unique_category(sender, instance, **kwargs):
     inst_id = instance.id
-
-    unique_obj = UniqueCategory.objects.get(cat_id=inst_id)
-    unique_obj.delete()
+    try:
+        unique_obj = UniqueCategory.objects.get(cat_id=inst_id)
+        unique_obj.delete()
+    except doesnt_exist:
+        pass
 

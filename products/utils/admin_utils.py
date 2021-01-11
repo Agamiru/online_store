@@ -13,12 +13,18 @@ from ..utils.general_utils import BhphotovideoTableConverter
 
 class FormSpecsField(fields.JSONField):
     # Check for 3 possibilities:
-    # 1. Value wasn't filled.
-    # 2. Value comes in expected format.
-    # 3. Value is default-filled "null".
+    # 1. Value wasn't filled, return None
+    # 2. Value comes in HTML, convert to JSON compatible python type and return.
+    # 3. Value is string from database, return "in_database".
+
+    widget = Textarea(attrs={
+        "placeholder": "Insert HTML specs here",
+    })
+
     def to_python(self, value):
         if value in self.empty_values:
             return None
+
         value = str(value)
         if value.startswith("<") and value.endswith(">"):  # html check
             converter_obj = BhphotovideoTableConverter(value)
@@ -32,15 +38,12 @@ class FormSpecsField(fields.JSONField):
                     code='invalid',
                     params={'value': value},
                 )
-        if value == "null":      # Default value check
-            return "null"
 
         return "in_database"
 
     def prepare_value(self, value):
-        print(f"value from {__class__.__name__}: {type(value)}")
-        if value == "null" or not value:
-            return json.dumps(None, cls=self.encoder)
+        if value is None:
+            return
         if isinstance(value, forms.fields.InvalidJSONInput):
             return value
         return json.dumps(value, cls=self.encoder)
@@ -53,10 +56,7 @@ class FormCommaNewLineSeparatedField(fields.JSONField):
 
     def to_python(self, value):
         if value in self.empty_values:
-            return None
-
-        if value == "null":     # default checker
-            return value
+            return [""]
 
         items = value.split("\n")       # For lists delimited by a new line character
         items_2 = value.split(",")      # For lists delimited by a comma
@@ -74,9 +74,8 @@ class FormCommaNewLineSeparatedField(fields.JSONField):
             )
 
     def prepare_value(self, value):
-        print(f"value from {__class__.__name__}: {type(value)}")
-        if value == "null" or not value:
-            return json.dumps(None, cls=self.encoder)
+        if value is None:
+            return
         if isinstance(value, forms.fields.InvalidJSONInput):
             return value
         return ', '.join(value)
@@ -107,15 +106,15 @@ class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):
 
         # Create a unique hash for the combination
         self.cleaned_data["hash_field"] = zlib.adler32(bytes(hash_value, encoding="utf-8"))
-        # print(f"hash_field: {self.cleaned_data['hash_field']}")
+        print(f"hash_field: {self.cleaned_data['hash_field']}")
 
         return self.cleaned_data
 
     # Get the two important model field names
     def get_field_names(self):     # Tuple[str, str]
-        # Actually second and third field names considering the index/id field
-        # But for readability let it be first and second
-        first_field_name = self._meta.model()._meta.fields[1].name
-        second_field_name = self._meta.model()._meta.fields[2].name
+        # Actually third and fourth field names considering the index/id
+        # field and hash_field, but for readability let it be first and second
+        first_field_name = self._meta.model()._meta.fields[2].name
+        second_field_name = self._meta.model()._meta.fields[3].name
 
         return first_field_name, second_field_name

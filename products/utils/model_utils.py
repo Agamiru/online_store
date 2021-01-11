@@ -101,7 +101,7 @@ class GetMainFeatures:
 
     def set_features_list(self):
         """
-        Sets features list which will br used to create features_dict.
+        Sets features list which will be used to create features_dict.
         """
         approp_cat = self.return_appropriate_category_instance()
         if not self.product_instance.specs_from_bhpv:
@@ -121,9 +121,9 @@ class GetMainFeatures:
         alias_f = self.product_instance.features_alias
         assert len(main_f) == len(alias_f), "Lists must be of equal lengths"
         count = 0
-        new_specs = {}
+        new_specs, specs_keys = {}, specs.keys()
         for feature in alias_f:
-            if feature in specs.keys():
+            if feature in specs_keys:
                 new_specs[main_f[count]] = specs.get(feature)
             count += 1
 

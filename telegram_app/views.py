@@ -52,8 +52,10 @@ def unknown(update, context):
 
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
+
 inline_caps_handler = InlineQueryHandler(inline_caps)
 dispatcher.add_handler(inline_caps_handler)
+
 unknown_handler = MessageHandler(Filters.command, unknown)
 dispatcher.add_handler(unknown_handler)
 
