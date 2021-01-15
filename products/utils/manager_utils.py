@@ -11,7 +11,7 @@ django_model = Type[models.Model]     # Subtype of models.Model
 class SearchResult:
     """
     A class to store information about the details of a search operation.
-    All manger functions with name '**_search' return this result.
+    All manger functions with name '*_search' return this result.
     """
     def __init__(self, results, query_field: str, query_type="get", **kwargs):
         self.results: Union[queryset, List[django_model]] = results

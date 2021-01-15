@@ -15,7 +15,7 @@ class TestProductManager(TestCase):
         pass
 
     def test_full_search(self):
-        value = "rokit g5"
+        value = "soundcard"
         prod_search = Product.objects.full_search(value)
         cat_search = search_all_categories(value)
         if cat_search:

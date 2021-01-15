@@ -16,9 +16,9 @@ django_model = Type[models.Model]     # Subtype of models.Model
 
 class ProductManager(models.Manager):
 
-    # def search_product_names(self, value: str):
-    #     results = self.filter(full_name__trigram_similar=value)
-    #     return results
+    def simple_search(self, value: str):
+        results = self.filter(full_name__trigram_similar=value)
+        return SearchResult(results, "full_name", "trigram", similarity=0.3)
 
     def trigram_similarity_search(
             self, value, sim_value: float = 0.5, field="full_name"
@@ -44,6 +44,7 @@ class ProductManager(models.Manager):
         ).filter(distance_gt=dist_value).filter(distance_lt=1).order_by("-distance")
         return SearchResult(res, field, "trigram", distance=dist_value)
 
+    # Basically a way to get a single object without a try/except block
     def get_obj_or_none(self, value, field="full_name") -> Union[django_model, None]:
         dict_ = {field: value}
         try:
@@ -104,6 +105,7 @@ class CategoryManagers(models.Manager):
         ).filter(distance_gt=dist_value).filter(distance_lt=1).order_by("-distance")
         return SearchResult(res, field, "trigram", distance=dist_value)
 
+    # Basically a way to get a single object without a try/except block
     def get_obj_or_none(self, value, field="name"):
         dict_ = {field: value}
         try:
@@ -129,7 +131,8 @@ class CategoryManagers(models.Manager):
             if res:
                 return res
         # Search Alias
-        res = self.exclude(alias=[""]) \
+        # Empty Array fields are empty lists = [""], exclude such objects
+        res = self.exclude(alias=list()) \
             .annotate(unnest=Func(F('alias'), function='unnest')) \
             .annotate(similar=TrigramSimilarity('unnest', value))
         # Manually filter queryset objects
@@ -147,4 +150,5 @@ class CategoryManagers(models.Manager):
         else:
             return SearchResult(suggestions, "alias", "trigram", suggestions=True) \
                         if suggestions else None
+
 
