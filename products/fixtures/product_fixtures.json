@@ -1,0 +1,1318 @@
+[
+{
+    "model": "products.category",
+    "pk": 6,
+    "fields": {
+        "name": "Audio Interfaces",
+        "alias": "[\"sound cards\"]",
+        "main_features": "[\"Channels of I/O\", \"Number of Mic Preamps\", \"Sample Rates\", \"Host Connection / USB\", \"Power Requirements\"]"
+    }
+},
+{
+    "model": "products.category",
+    "pk": 7,
+    "fields": {
+        "name": "Studio Monitors",
+        "alias": "[\"\"]",
+        "main_features": "[\"Drivers\", \"Monitor Type\", \"Frequency Range\", \"Audio I/O\"]"
+    }
+},
+{
+    "model": "products.category",
+    "pk": 8,
+    "fields": {
+        "name": "Midi Keyboards",
+        "alias": "[\"\"]",
+        "main_features": "[\"Keyboard\", \"MIDI Control Surfaces\", \"Performance Functions\", \"I/O\"]"
+    }
+},
+{
+    "model": "products.category",
+    "pk": 9,
+    "fields": {
+        "name": "Cables",
+        "alias": "[\"cords\", \"wire\"]",
+        "main_features": "[\"Connector 1\", \"Connector 2\", \"Cable Length\", \"Contact Plating\"]"
+    }
+},
+{
+    "model": "products.category",
+    "pk": 10,
+    "fields": {
+        "name": "Headphones",
+        "alias": "[\"\"]",
+        "main_features": "[\"Design\", \"Earcup Style\", \"Frequency Response\", \"Detachable\", \"Audio Connector to Source\"]"
+    }
+},
+{
+    "model": "products.categoryaccessoryjoin",
+    "pk": 1,
+    "fields": {
+        "cat_id": 6,
+        "accessory_id": 9
+    }
+},
+{
+    "model": "products.categoryaccessoryjoin",
+    "pk": 2,
+    "fields": {
+        "cat_id": 6,
+        "accessory_id": 10
+    }
+},
+{
+    "model": "products.categoryaccessoryjoin",
+    "pk": 3,
+    "fields": {
+        "cat_id": 7,
+        "accessory_id": 9
+    }
+},
+{
+    "model": "products.categoryaccessoryjoin",
+    "pk": 4,
+    "fields": {
+        "cat_id": 7,
+        "accessory_id": 10
+    }
+},
+{
+    "model": "products.categoryboughttogetherjoin",
+    "pk": 2,
+    "fields": {
+        "cat_id": 6,
+        "bought_together_id": 7
+    }
+},
+{
+    "model": "products.categoryboughttogetherjoin",
+    "pk": 6,
+    "fields": {
+        "cat_id": 6,
+        "bought_together_id": 8
+    }
+},
+{
+    "model": "products.subcategory1",
+    "pk": 4,
+    "fields": {
+        "cat_id": 7,
+        "name": "Active",
+        "alias": "[\"\"]",
+        "main_features": "[\"\"]"
+    }
+},
+{
+    "model": "products.subcategory1",
+    "pk": 5,
+    "fields": {
+        "cat_id": 9,
+        "name": "XLR to XLR",
+        "alias": "[\"canon to canon\", \"mic cable\"]",
+        "main_features": "[\"\"]"
+    }
+},
+{
+    "model": "products.subcat1accessoryjoin",
+    "pk": 4,
+    "fields": {
+        "subcat_1_id": 4,
+        "accessory_id": 5
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 1,
+    "fields": {
+        "name": "Alesis"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 2,
+    "fields": {
+        "name": "Focusrite"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 3,
+    "fields": {
+        "name": "Avid"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 4,
+    "fields": {
+        "name": "M-Audio"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 5,
+    "fields": {
+        "name": "KRK"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 6,
+    "fields": {
+        "name": "Tannoy"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 7,
+    "fields": {
+        "name": "Generic"
+    }
+},
+{
+    "model": "products.brand",
+    "pk": 10,
+    "fields": {
+        "name": "AKG"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 1,
+    "fields": {
+        "brand_id": 1,
+        "name": "V25"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 2,
+    "fields": {
+        "brand_id": 2,
+        "name": "Scarlett 2i2 G3"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 3,
+    "fields": {
+        "brand_id": 2,
+        "name": "Scarlett 18i20"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 4,
+    "fields": {
+        "brand_id": 1,
+        "name": "Koun"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 5,
+    "fields": {
+        "brand_id": 3,
+        "name": "Pro Tools HD Native Thunderbolt Interface"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 7,
+    "fields": {
+        "brand_id": 4,
+        "name": "AIR 192 | 4"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 8,
+    "fields": {
+        "brand_id": 5,
+        "name": "ROKIT 5 G4"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 9,
+    "fields": {
+        "brand_id": 6,
+        "name": "Reveal 802"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 10,
+    "fields": {
+        "brand_id": 4,
+        "name": "Oxygen 61 IV"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 11,
+    "fields": {
+        "brand_id": 7,
+        "name": "XLR M to XLR F"
+    }
+},
+{
+    "model": "products.modelname",
+    "pk": 12,
+    "fields": {
+        "brand_id": null,
+        "name": "K72"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 2,
+    "fields": {
+        "cat_id": 6,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 2,
+        "model_name": 2,
+        "full_name": "Focusrite Scarlett 2i2 G3",
+        "image": "",
+        "short_desc": "2x2 USB Audio Interface (3rd Generation)",
+        "price": 66000.0,
+        "available": true,
+        "in_the_box": [
+            "Focusrite Scarlett 2i2 2x2 USB Audio Interface (3rd Generation)",
+            "USB Type-C to USB Type-A Cable",
+            "Limited 3-Year Warranty"
+        ],
+        "specs": {
+            "EIN": {
+                "Mic Inputs:": "-128 dBu A-Weighted "
+            },
+            "Pad": [
+                "None"
+            ],
+            "THD+N": {
+                "Mic Inputs:": "< 0.0012% ",
+                "Hi-Z Inputs:": "< 0.03% ",
+                "Line Inputs:": "< 0.002% ",
+                "Line Outputs:": "< 0.002% ",
+                "Headphone Outputs:": "< 0.002% "
+            },
+            "Weight": [
+                "1.0�lb / 470.0�g"
+            ],
+            "Display": [
+                "None"
+            ],
+            "MIDI I/O": [
+                "None"
+            ],
+            "Impedance": {
+                "Mic Inputs:": "3 Kilohms ",
+                "Hi-Z Inputs:": "1.5 Megohms ",
+                "Line Inputs:": "60 Kilohms ",
+                "Line Outputs:": "430 Ohms ",
+                "Headphone Outputs:": "< 1 Ohm "
+            },
+            "Solo/Mute": [
+                "None"
+            ],
+            "Bit Depths": [
+                "Up to 24-Bit (AD/DA Conversion)"
+            ],
+            "Dimensions": [
+                "6.89 x 3.89 x 1.87\" / 17.5 x 9.88 x 4.75�cm"
+            ],
+            "Form Factor": [
+                "Tabletop"
+            ],
+            "Sample Rates": [
+                "Up to 192 kHz (AD/DA Conversion) "
+            ],
+            "Sync Sources": [
+                "Internal"
+            ],
+            "Dynamic Range": {
+                "Mic Inputs:": "111 dBA ",
+                "Hi-Z Inputs:": "110 dBA ",
+                "Line Inputs:": "110.5 dBA ",
+                "Line Outputs:": "108 dBA ",
+                "Headphone Outputs:": "104 dBA "
+            },
+            "Phantom Power": [
+                "+48 V, Selectable On/Off (Applied to All Inputs)"
+            ],
+            "Package Weight": [
+                "1.445 lb"
+            ],
+            "Channels of I/O": {
+                "Analog:": "2 Input / 2 Output at 192 kHz"
+            },
+            "Expansion Slots": [
+                "None"
+            ],
+            "Gain/Trim Range": {
+                "Inputs:": "Up to +56 dB "
+            },
+            "Max Input Level": {
+                "Mic Inputs:": "+9 dBu (Min Gain) ",
+                "Hi-Z Inputs:": "+12.5 dBu (Min Gain) ",
+                "Line Inputs:": "+22 dBu (Min Gain) "
+            },
+            "Analog Audio I/O": [
+                "2 x Combo XLR-1/4\" TRS Balanced/Unbalanced Mic/Line/Hi-Z Input (Front Panel)",
+                "2 x 1/4\" TRS Balanced Monitor Output",
+                "1 x 1/4\" TRS Unbalanced Headphone Output (Front Panel)"
+            ],
+            "High-Pass Filter": [
+                "None"
+            ],
+            "Max Output Level": {
+                "Headphone Outputs:": "+7 dBu ",
+                "Monitor/Line Outputs:": "+15.5 dBu at 0 dBFS "
+            },
+            "Memory Card Slot": [
+                "None"
+            ],
+            "OS Compatibility": [
+                "macOS 10.12 or Later",
+                "Windows 7 or Later"
+            ],
+            "Digital Audio I/O": [
+                "None"
+            ],
+            "Included Software": [
+                "Ableton Live Lite",
+                "Pro Tools First"
+            ],
+            "Required Hardware": [
+                "Available USB 2.0 Port ",
+                "USB Cable (Included) "
+            ],
+            "Frequency Response": {
+                "Inputs:": "20 Hz to 20 kHz �0.1 dB "
+            },
+            "Power Requirements": [
+                "USB Bus Power"
+            ],
+            "Anti-Theft Features": [
+                "Kensington Security Slot"
+            ],
+            "Internet Connection": [
+                "Required for Software/Driver Download"
+            ],
+            "Host Connection / USB": [
+                "1 x USB Type-C (USB 2.0)"
+            ],
+            "Number of Mic Preamps": [
+                "2"
+            ],
+            "Wireless Connectivity": [
+                "None"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "8.15 x 5.85 x 2.55\""
+            ],
+            "Input Level Adjustment": [
+                "2 x Knob"
+            ],
+            "Sample Rate Conversion": [
+                "None"
+            ],
+            "Max Sample Rate/Resolution": [
+                "192 kHz / 24-Bit"
+            ],
+            "Mobile Device Compatibility": [
+                "iPad Pro   (with USB Type-C)"
+            ],
+            "Compatible Software (Not Included)": [
+                "Any Core Audio (Mac) Compliant Software"
+            ]
+        },
+        "package_dimensions": "8.15 x 5.85 x 2.55\"",
+        "weight": "1.445 lb",
+        "date_created": "2021-01-12T12:36:50.820Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 3,
+    "fields": {
+        "cat_id": 6,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 2,
+        "model_name": 3,
+        "full_name": "Focusrite Scarlett 18i20",
+        "image": "",
+        "short_desc": "Rackmount 18x20 USB Type-C Audio/MIDI Interface (3rd Generation)",
+        "price": 190003.0,
+        "available": true,
+        "in_the_box": [
+            "Focusrite Scarlett 18i20 Rackmount 18x20 USB Type-C Audio/MIDI Interface (3rd Generation)",
+            "USB Type-C to USB Type-A Cable",
+            "IEC Power Cable",
+            "Set of Rack Ears",
+            "Limited 2-Year Warranty"
+        ],
+        "specs": {
+            "EIN": {
+                "None": "Up to 24-Bit (AD/DA Conversion)"
+            },
+            "Pad": [
+                "-10 dB (Switchable per Channel)"
+            ],
+            "THD+N": {
+                "< 0.03% ": "Line Inputs:",
+                "< 0.002% ": "Mic Inputs:",
+                "-128 dB A-Weighted ": "Up to 192 kHz (AD/DA Conversion) "
+            },
+            "Weight": [],
+            "Display": [
+                "8 x Multi-Segment LED Meter"
+            ],
+            "MIDI I/O": [
+                "1 x DIN 5-Pin Input",
+                "1 x DIN 5-Pin Output"
+            ],
+            "Sync I/O": [
+                "1 x BNC Word Clock Output"
+            ],
+            "Impedance": {
+                "111 dBA ": "Hi-Z Inputs:",
+                "< 1 Ohm ": "Mic Inputs:",
+                "430 Ohms ": "Headphone Outputs:",
+                "60 Kilohms ": "Line Outputs:",
+                "1.5 Megohms ": "Line Inputs:"
+            },
+            "Solo/Mute": [
+                "Mute per Master"
+            ],
+            "Bit Depths": [
+                "Windows 7 or Later"
+            ],
+            "Dimensions": [
+                "23.7 x 12.8 x 3.5\""
+            ],
+            "Form Factor": [
+                "Rackmount (Rack-Mountable with Included Hardware)"
+            ],
+            "Network I/O": [
+                "None"
+            ],
+            "Sample Rates": [
+                "ADAT, Internal, S/PDIF"
+            ],
+            "Sync Sources": [
+                "Ableton Live Lite"
+            ],
+            "Dynamic Range": {
+                "104 dBA ": "Mic Inputs:",
+                "110 dBA ": "Line Inputs:",
+                "108.5 dBA ": "Headphone Outputs:",
+                "110.5 dBA ": "Line Outputs:",
+                "< 0.0012% ": "Hi-Z Inputs:"
+            },
+            "Phantom Power": [
+                "+48 V, Selectable On/Off (on 8 Channels)"
+            ],
+            "AC Input Power": [
+                "19 x 10.23 x 1.83\" / 48.3 x 25.98 x 4.65�cm"
+            ],
+            "Package Weight": [],
+            "Rackmount Size": [
+                "9.8 lb"
+            ],
+            "USB (Non-Host)": [
+                "None"
+            ],
+            "Channels of I/O": {
+                "Analog:": "8 Inputs / 10 Outputs",
+                "Digital:": "10 Inputs / 10 Outputs"
+            },
+            "Expansion Slots": [
+                "None"
+            ],
+            "Gain/Trim Range": {
+                "Mic/Line Inputs:": "56 dB "
+            },
+            "Max Input Level": [
+                "Mic Inputs:+9 dBu (Min Gain) ",
+                "+16 dBu (Min Gain, with Pad) Hi-Z Inputs:",
+                "+12.5 dBu (Min Gain) +14 dBu (Min Gain, with Pad) ",
+                "Line Inputs:+22 dBu (Min Gain) ",
+                "+29 dBu (Min Gain, with Pad) Line Outputs:",
+                "+15.5 dBu (Balanced) Headphone Outputs:"
+            ],
+            "Analog Audio I/O": [
+                "2 x Combo XLR-1/4\" TRS Balanced/Unbalanced Mic/Line/Hi-Z Input",
+                "6 x Combo XLR-1/4\" TRS Balanced Mic/Line Input",
+                "10 x 1/4\" TRS Balanced/Unbalanced Line/Monitor Output",
+                "2 x 1/4\" TRS Unbalanced Headphone Output"
+            ],
+            "High-Pass Filter": [
+                "None"
+            ],
+            "Max Output Level": {
+                "+7 dBu ": "Mic Inputs:",
+                "3 Kilohms ": "Hi-Z Inputs:"
+            },
+            "Memory Card Slot": [
+                "None"
+            ],
+            "OS Compatibility": [
+                "Pro Tools First",
+                "Any Core Audio (Mac) Compliant Software"
+            ],
+            "Digital Audio I/O": [
+                "1 x RCA Coaxial S/PDIF Input",
+                "1 x RCA Coaxial S/PDIF Output",
+                "1 x TOSLINK Optical ADAT / S/PDIF Input (S/MUX Support)",
+                "1 x TOSLINK Optical ADAT Input (S/MUX Support)",
+                "1 x TOSLINK Optical ADAT / S/PDIF Output (S/MUX Support)",
+                "1 x TOSLINK Optical ADAT Output (S/MUX Support)"
+            ],
+            "Included Software": [
+                "Core Audio (Mac)",
+                "ASIO"
+            ],
+            "Power Consumption": [
+                "7.2�lb / 3.3�kg"
+            ],
+            "Required Hardware": [
+                "AC Input",
+                "100 to 240 VAC, 50 / 60 Hz "
+            ],
+            "Frequency Response": [
+                "20 Hz to 20 kHz �0.1 dB "
+            ],
+            "Power Requirements": [
+                "1 RU (with Included Hardware)"
+            ],
+            "Internet Connection": [
+                "30 W"
+            ],
+            "Host Connection / USB": [
+                "1 x USB Type-C (USB 2.0)"
+            ],
+            "Number of Mic Preamps": [
+                "8"
+            ],
+            "Wireless Connectivity": [
+                "None"
+            ],
+            "Box Dimensions (LxWxH)": [],
+            "Input Level Adjustment": [
+                "8 x Knob"
+            ],
+            "Sample Rate Conversion": [
+                "macOS 10.12 / 10.13 / 10.14 / 10.15 / 11"
+            ],
+            "Max Sample Rate/Resolution": [
+                "192 kHz / 24-Bit"
+            ],
+            "Mobile Device Compatibility": [
+                "Required for Software/Driver Download"
+            ],
+            "Supported Drivers/API & Plug-Ins": [
+                "None",
+                "Available USB 2.0 Port ",
+                "USB Cable (Included) "
+            ],
+            "Compatible Software (Not Included)": [
+                "WDM"
+            ]
+        },
+        "package_dimensions": "23.7 x 12.8 x 3.5\"",
+        "weight": "9.8 lb",
+        "date_created": "2021-01-12T12:36:50.820Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 4,
+    "fields": {
+        "cat_id": 6,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 3,
+        "model_name": 5,
+        "full_name": "Avid Pro Tools HD Native Thunderbolt Interface",
+        "image": "",
+        "short_desc": "HD Native Thunderbolt Interface",
+        "price": 346666.0,
+        "available": true,
+        "in_the_box": [
+            "Avid Pro Tools HD Native Thunderbolt Interface (No Software)",
+            "External Power Supply",
+            "One (1) Year Limited Warranty"
+        ],
+        "specs": {
+            "MIDI I/O": [
+                "None"
+            ],
+            "Form Factor": [
+                "Tabletop"
+            ],
+            "Package Weight": [
+                "3.6 lb"
+            ],
+            "Channels of I/O": [
+                "64 Input / 64 Output"
+            ],
+            "Analog Audio I/O": [
+                "1 x 1/4\" TRS Headphone Output"
+            ],
+            "OS Compatibility": [
+                "macOS",
+                "Windows"
+            ],
+            "Digital Audio I/O": [
+                "None"
+            ],
+            "Required Hardware": [
+                "Thunderbolt Port "
+            ],
+            "Number of Mic Preamps": [
+                "None"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "9 x 9 x 7.5\""
+            ],
+            "Max Sample Rate/Resolution": [
+                "192 kHz / 24-Bit"
+            ]
+        },
+        "package_dimensions": "9 x 9 x 7.5\"",
+        "weight": "3.6 lb",
+        "date_created": "2021-01-12T12:36:50.788Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 5,
+    "fields": {
+        "cat_id": 6,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 4,
+        "model_name": 7,
+        "full_name": "M-Audio AIR 192 | 4",
+        "image": "",
+        "short_desc": "Desktop 2x2 USB Type-C Audio Interface",
+        "price": 65000.0,
+        "available": true,
+        "in_the_box": [
+            "M-Audio AIR 192|4 Desktop 2x2 USB Type-C Audio Interface",
+            "USB Type-C Cable",
+            "USB Type-C to Type-A Cable",
+            "Avid Pro Tools | First M-Audio Edition (Download)",
+            "Ableton Live Lite (Download)",
+            "20 x AIR Creative FX Plug-Ins (Download)",
+            "20 x Avid Effect Plug-Ins (Download)",
+            "Avid Eleven Lite Guitar Amp Simulator (Download)",
+            "AIR Music Boom Drum Machine (Download)",
+            "AIR Music Vacuum Monophonic Synthesizer (Download)",
+            "AIR Music Mini Grand (Download)",
+            "AIR Music Xpand!2 Virtual Instrument (Download)",
+            "2GB Sample Collection by Touch Loops (Download)",
+            "Limited 1-Year Warranty"
+        ],
+        "specs": {
+            "EIN": {
+                "Mic Inputs:": "-128 dBu A-Weighted (150-Ohm Source, Max Gain) "
+            },
+            "Pad": [
+                "None"
+            ],
+            "SNR": {
+                "Mic Inputs:": "104 dB (A-Weighted) ",
+                "Hi-Z Inputs:": "102 dB (A-Weighted) ",
+                "Line Inputs:": "101 dB (A-Weighted) ",
+                "Monitor Outputs:": "102 dB (A-Weighted) "
+            },
+            "THD+N": {
+                "Hi-Z Inputs:": "0.004% ",
+                "Mic/Line Inputs:": "0.003% ",
+                "Headphone/Monitor Outputs:": "0.005% "
+            },
+            "Weight": [
+                "2.0�lb / 0.9�kg"
+            ],
+            "Display": [
+                "2 x Multi-Segment LED Meter"
+            ],
+            "Latency": [
+                "2.59 ms (Dependent on Buffer Size, Input to Output)"
+            ],
+            "MIDI I/O": [
+                "None"
+            ],
+            "Sync I/O": [
+                "None"
+            ],
+            "Impedance": {
+                "Hi-Z Inputs:": "1 Megohm (Unbalanced) ",
+                "Headphone Outputs:": "10 Ohms (Balanced) "
+            },
+            "Solo/Mute": [
+                "None"
+            ],
+            "Bit Depths": [
+                "24-Bit (AD/DA Conversion)"
+            ],
+            "Dimensions": [
+                "8 x 6 x 2.76\" / 20.3 x 15.2 x 7.01�cm"
+            ],
+            "Form Factor": [
+                "Tabletop"
+            ],
+            "Network I/O": [
+                "None"
+            ],
+            "Sample Rates": [
+                "Up to 192 kHz (AD/DA Conversion) "
+            ],
+            "Sync Sources": [
+                "Internal"
+            ],
+            "Dynamic Range": {
+                "Mic Inputs:": "104 dB (A-Weighted) ",
+                "Hi-Z Inputs:": "100 dB (A-Weighted) ",
+                "Monitor Outputs:": "102 dB (A-Weighted) "
+            },
+            "Phantom Power": [
+                "+48 V, Selectable On/Off"
+            ],
+            "Package Weight": [
+                "2.85 lb"
+            ],
+            "USB (Non-Host)": [
+                "None"
+            ],
+            "Channels of I/O": {
+                "Analog:": "2 Inputs / 2 Outputs at 192 kHz"
+            },
+            "Expansion Slots": [
+                "None"
+            ],
+            "Gain/Trim Range": {
+                "Hi-Z Inputs:": "24 dB ",
+                "Mic/Line Inputs:": "55 dB "
+            },
+            "Max Input Level": {
+                "Mic Inputs:": "+1.5 dBu ",
+                "Hi-Z Inputs:": "+6 dBu ",
+                "Line Inputs:": "+16 dBu "
+            },
+            "Analog Audio I/O": [
+                "1 x Combo XLR-1/4\" TRS Balanced Mic/Line Input",
+                "1 x 1/4\" TS Unbalanced Hi-Z Input (Front Panel)",
+                "2 x 1/4\" TRS Balanced Line Output",
+                "1 x 1/4\" TRS Unbalanced Headphone Output (Front Panel)"
+            ],
+            "High-Pass Filter": [
+                "None"
+            ],
+            "Max Output Level": {
+                "Line Outputs:": "+7 dBu (Balanced, 1 kHz) "
+            },
+            "Memory Card Slot": [
+                "None"
+            ],
+            "OS Compatibility": [
+                "macOS 10.8 or Later",
+                "Windows 7 or Later"
+            ],
+            "Digital Audio I/O": [
+                "None"
+            ],
+            "Included Software": [
+                "Pro Tools First M-Audio Edition",
+                "Ableton Live Lite"
+            ],
+            "Required Hardware": [
+                "Available USB 2.0 Port or USB Type-C Port ",
+                "USB Cable (Included) "
+            ],
+            "Frequency Response": {
+                "Mic Inputs:": "20 Hz to 20 kHz +0.1 dB ",
+                "Monitor Outputs:": "20 Hz to 20 kHz +0.06 dB ",
+                "Line, Hi-Z Inputs:": "20 Hz to 20 kHz �0.05 dB "
+            },
+            "Power Requirements": [
+                "USB Bus Power"
+            ],
+            "Anti-Theft Features": [
+                "Kensington Security Slot"
+            ],
+            "Internet Connection": [
+                "Required for Registration, Software/Driver Download"
+            ],
+            "Host Connection / USB": [
+                "1 x USB Type-C (Class-Compliant USB 2.0)"
+            ],
+            "Number of Mic Preamps": [
+                "1"
+            ],
+            "Wireless Connectivity": [
+                "None"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "11.3 x 7.9 x 4.13\""
+            ],
+            "Input Level Adjustment": [
+                "2 x Knob"
+            ],
+            "Sample Rate Conversion": [
+                "None"
+            ],
+            "Max Sample Rate/Resolution": [
+                "192 kHz / 24-Bit"
+            ],
+            "Mobile Device Compatibility": [
+                "None"
+            ],
+            "Supported Drivers/API & Plug-Ins": [
+                "macOS Class-Compliant (No Driver Needed)",
+                "Windows Driver Downloadable from Manufacturer"
+            ],
+            "Compatible Software (Not Included)": [
+                "Any Core Audio (Mac) Compliant Software"
+            ]
+        },
+        "package_dimensions": "11.3 x 7.9 x 4.13\"",
+        "weight": "2.85 lb",
+        "date_created": "2021-01-12T12:36:50.773Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 6,
+    "fields": {
+        "cat_id": 7,
+        "subcat_1_id": 4,
+        "subcat_2_id": null,
+        "comes_in_pairs": true,
+        "specs_from_bhpv": true,
+        "brand": 5,
+        "model_name": 8,
+        "full_name": "KRK ROKIT 5 G4",
+        "image": "",
+        "short_desc": "5\" 2-Way Active Studio Monitor (Single, Black)",
+        "price": 170000.0,
+        "available": true,
+        "in_the_box": [
+            "KRK ROKIT 5 G4 5\" 2-Way Active Studio Monitor (Single",
+            "Black)",
+            "AC Power Cord",
+            "Limited 3-Year Warranty"
+        ],
+        "specs": {
+            "EQ": [
+                "104�dBLimiter",
+                "2 x LF Shelf� dB"
+            ],
+            "Weight": [
+                "Combo XLR-1/4\" Balanced/Unbalanced Male Analog Input"
+            ],
+            "Drivers": [
+                "LF Driver: 1 x ",
+                "5.25\" / 13.34�cm Kevlar WooferHF Driver: "
+            ],
+            "Audio I/O": [
+                "2 x HF Shelf� dB"
+            ],
+            "Monitor Type": [
+                "Active�2-Way"
+            ],
+            "Power Rating": [
+                "55 W�RMS"
+            ],
+            "Amplification": [
+                "1 x 1\" / 2.54�cm Kevlar Tweeter",
+                "1 x HF Amplifier: Class-D�Rated at 20�W RMS"
+            ],
+            "Package Weight": [
+                "7.5 x 11.2 x 9.5\" / 19.1 x 28.4 x 24.1�cm"
+            ],
+            "Frequency Range": [
+                "1 x "
+            ],
+            "Frequency Response": [
+                "LF Amplifier: Class-D�Rated at 35�W RMS"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "10.6�lb / 4.8�kg�(Active Speaker)"
+            ],
+            "Dimensions (W x H x D)": [
+                "1 x "
+            ],
+            "Protections and Limiting": [
+                "43�Hz to 40�kHz"
+            ],
+            "Maximum Sound Pressure Level (SPL)": [
+                "43�Hz to 40�kHz"
+            ]
+        },
+        "package_dimensions": "10.6�lb / 4.8�kg�(Active Speaker)",
+        "weight": "7.5 x 11.2 x 9.5\" / 19.1 x 28.4 x 24.1�cm",
+        "date_created": "2021-01-12T12:36:50.750Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 7,
+    "fields": {
+        "cat_id": 7,
+        "subcat_1_id": 4,
+        "subcat_2_id": null,
+        "comes_in_pairs": true,
+        "specs_from_bhpv": true,
+        "brand": 6,
+        "model_name": 9,
+        "full_name": "Tannoy Reveal 802",
+        "image": "",
+        "short_desc": "8\" 140W Active Studio Monitor",
+        "price": 200000.0,
+        "available": true,
+        "in_the_box": [
+            "Tannoy Reveal 802 8\" 140W Active Studio Monitor (Single)",
+            "5m 1/8\" (3.5mm) Jack Cable",
+            "Limited 1-Year Warranty"
+        ],
+        "specs": {
+            "THD": [
+                "< 0.4%"
+            ],
+            "Inputs": [
+                "Balanced: XLR, 20 kOhm ",
+                "\r\nUnbalanced: 1/4\" jack, 10 kOhm",
+                "\r\nAUX Link: 1/8\" jack, 10 kOhm"
+            ],
+            "Output": [
+                "AUX Link: 1/8\" jack"
+            ],
+            "Weight": [
+                "Not specified by manufacturer"
+            ],
+            "Drivers": [
+                "LF/mid range: 8\" (200 mm) ",
+                "\r\nHF: 1\" (25 mm), soft dome"
+            ],
+            "Fuse Data": [
+                "100 - 120 V: T2AL / 250 V",
+                "\r\n200 - 240 V: T1AL / 250 V"
+            ],
+            "Dimensions": [
+                "15.35 x 10.00 x 11.81\" (390 x 254 x 300 mm)"
+            ],
+            "Maximum SPL": [
+                "114 dB"
+            ],
+            "Equalization": [
+                "Neutral HF setting, +/-1.5 dB HF boost/cut"
+            ],
+            "Package Weight": [
+                "31.4 lb"
+            ],
+            "Amplified Output": [
+                "LF/mid range: 100 W (RMS)",
+                "\r\nHF: 40 W (RMS)"
+            ],
+            "Frequency Response": [
+                "42 Hz - 43 kHz"
+            ],
+            "Crossover Frequency": [
+                "1.8 kHz"
+            ],
+            "Max Power Consumption": [
+                "240 W"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "20.9 x 16.1 x 14.5\""
+            ],
+            "Low Frequency Alignment": [
+                "Optimized front port"
+            ],
+            "Power Supply Compatibility": [
+                "100-120 V or 200-240 V (50 - 60 Hz)"
+            ]
+        },
+        "package_dimensions": "20.9 x 16.1 x 14.5\"",
+        "weight": "31.4 lb",
+        "date_created": "2021-01-12T12:36:50.719Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 8,
+    "fields": {
+        "cat_id": 8,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 1,
+        "model_name": 1,
+        "full_name": "Alesis V25",
+        "image": "",
+        "short_desc": "25-Key USB MIDI Keyboard Controller",
+        "price": 65000.0,
+        "available": true,
+        "in_the_box": [
+            "Alesis V25 25-Key USB MIDI Keyboard Controller",
+            "USB Cable",
+            "Ableton Live Lite Download",
+            "Xpand! Software Download",
+            "Limited 1-Year Warranty"
+        ],
+        "specs": {
+            "I/O": [
+                "1 x USB Type-B�"
+            ],
+            "Keyboard": [
+                "25�Full-Size�Keys,�Synth�Action�with�Velocity"
+            ],
+            "Package Weight": [
+                "5.2 lb"
+            ],
+            "OS Compatibility": [
+                "macOS�10",
+                "Windows"
+            ],
+            "MIDI Control Surfaces": [
+                "1 x Wheel�(Pitch-Bend)",
+                "1 x Wheel�(Modulation)",
+                "8 x Pads�(Velocity-Sensitive)",
+                "4 x Rotary Encoders",
+                "4 x Buttons�(Assignable)"
+            ],
+            "Performance Functions": [
+                "Octave Shift, Transport Controls"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "24.5 x 10 x 5\""
+            ]
+        },
+        "package_dimensions": "24.5 x 10 x 5\"",
+        "weight": "5.2 lb",
+        "date_created": "2021-01-12T12:36:50.688Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 9,
+    "fields": {
+        "cat_id": 8,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 4,
+        "model_name": 10,
+        "full_name": "M-Audio Oxygen 61 IV",
+        "image": "",
+        "short_desc": "USB MIDI Keyboard Controller",
+        "price": 150000.0,
+        "available": true,
+        "in_the_box": [
+            "M-Audio Oxygen 61 IV - USB MIDI Keyboard Controller",
+            "USB Cable",
+            "Ableton Live Lite",
+            "SONiVOX Twist",
+            "AIR Music Tech Xpand!2",
+            "Limited 1-Year Warranty"
+        ],
+        "specs": {
+            "I/O": [
+                "1 x USB Type-B�"
+            ],
+            "Weight": [
+                "7.5�lb / 3.4�kg"
+            ],
+            "Keyboard": [
+                "61��Keys,�Synth�Action"
+            ],
+            "Power Options": [
+                "USB Bus-Power"
+            ],
+            "Package Weight": [
+                "9.55 lb"
+            ],
+            "OS Compatibility": [
+                "macOS�10",
+                "Windows"
+            ],
+            "MIDI Control Surfaces": [
+                "1 x Wheel�(Pitch-Bend)",
+                "1 x Wheel�(Modulation)",
+                "8 x Pads",
+                "8 x Rotary Encoders",
+                "9 x Sliders",
+                "9 x Buttons�(Assignable)"
+            ],
+            "Performance Functions": [
+                "Transport Controls"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "40 x 11.5 x 5\""
+            ],
+            "Dimensions (W x D x H)": [
+                "38.5 x 9.6 x 3.7\" / 977.0 x 243.0 x 94.0�mm"
+            ]
+        },
+        "package_dimensions": "40 x 11.5 x 5\"",
+        "weight": "9.55 lb",
+        "date_created": "2021-01-12T12:36:50.672Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 10,
+    "fields": {
+        "cat_id": 9,
+        "subcat_1_id": 5,
+        "subcat_2_id": null,
+        "comes_in_pairs": true,
+        "specs_from_bhpv": true,
+        "brand": 7,
+        "model_name": null,
+        "full_name": "Generic XLR M to XLR F",
+        "image": "",
+        "short_desc": "XLR M to XLR F Cable",
+        "price": 3500.0,
+        "available": true,
+        "in_the_box": [
+            "Cable",
+            "Limited 3-Year Warranty"
+        ],
+        "specs": {
+            "Shielding": [
+                "98% Braid"
+            ],
+            "Wire Gauge": [
+                "24 AWG"
+            ],
+            "Connector 1": [
+                "3-Pin XLR Male"
+            ],
+            "Connector 2": [
+                "3-Pin XLR Female"
+            ],
+            "Cable Length": [
+                "50' / 15.2�m"
+            ],
+            "Package Weight": [
+                "1.95 lb"
+            ],
+            "Contact Plating": [
+                "Silver"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "11 x 10.6 x 1.65\""
+            ]
+        },
+        "package_dimensions": "11 x 10.6 x 1.65\"",
+        "weight": "1.95 lb",
+        "date_created": "2021-01-12T12:15:41.445Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+},
+{
+    "model": "products.product",
+    "pk": 11,
+    "fields": {
+        "cat_id": 10,
+        "subcat_1_id": null,
+        "subcat_2_id": null,
+        "comes_in_pairs": false,
+        "specs_from_bhpv": true,
+        "brand": 10,
+        "model_name": 12,
+        "full_name": "AKG K72",
+        "image": "",
+        "short_desc": "Closed-Back Studio Headphones",
+        "price": 35000.0,
+        "available": true,
+        "in_the_box": [
+            "AKG K72 Closed-Back Studio Headphones",
+            "1/4\" Screw-On Adapter",
+            "Limited 2-Year Warranty"
+        ],
+        "specs": {
+            "Design": [
+                "Over-Ear (Circumaural)"
+            ],
+            "Weight": [
+                "0.44�lb / 200�g "
+            ],
+            "Foldable": [
+                "No"
+            ],
+            "Impedance": [
+                "32 Ohms"
+            ],
+            "Detachable": [
+                "Yes"
+            ],
+            "Sensitivity": [
+                "112 dB"
+            ],
+            "Earcup Style": [
+                "Closed-Back"
+            ],
+            "Package Weight": [
+                "1.225 lb"
+            ],
+            "Adapter (Included)": [
+                "1/4\""
+            ],
+            "Frequency Response": [
+                "16 Hz to 20 kHz"
+            ],
+            "Box Dimensions (LxWxH)": [
+                "9.65 x 8.9 x 4.35\""
+            ],
+            "Maximum Power Handling": [
+                "200 mW"
+            ],
+            "Material of Construction": [
+                "Leatherette"
+            ],
+            "Audio Connector to Source": [
+                "1/8\" / 3.5 mm TRS"
+            ]
+        },
+        "package_dimensions": "9.65 x 8.9 x 4.35\"",
+        "weight": "1.225 lb",
+        "date_created": "2021-01-12T12:36:50.587Z",
+        "features_alias": "[\"\"]",
+        "variants": "{}"
+    }
+}
+]
