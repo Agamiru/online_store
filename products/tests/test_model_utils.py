@@ -72,6 +72,7 @@ class TestGetMainFeatures(TestCase):
         )
 
     def test_set_custom_alias(self):
+        # Set data
         specs = {
             "key": ["Really dope stuff"],
             "midi": ["Nice Midi"], "fishes": ["Swim a lot"],
@@ -81,14 +82,16 @@ class TestGetMainFeatures(TestCase):
             "Keyboard", "MIDI Control Surfaces", "OS Compatibility"
         ]
         alias_f = ["key", "midi", "os"]
+
         # Create product_instance class
         prod_inst = type("prod_inst", (), {"specs": specs, "features_alias": alias_f, "specs_from_bhpv": False})
         approp_cat = type("approp_cat", (), {"main_features": main_f})
+
         # Instantiate GMF class with custom_alias list
         main_f_obj = gmf(prod_inst, ["shell", "camp"])
-        # main_f_obj.features_list = main_f       # Bypass set_features_list
         main_f_obj.return_appropriate_category_instance = lambda: approp_cat    # set callable
         self.assertEqual(main_f_obj.return_appropriate_category_instance(), approp_cat)
+
         # Make sure AssertionError is raised
         self.assertRaisesMessage(
             AssertionError, "Lists must be of equal lengths", main_f_obj.final

@@ -1,11 +1,13 @@
 import json
-from typing import List, Tuple
+from typing import Union
 
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist as doesnt_exist
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, HStoreField
 
 from .utils.model_utils import CrossModelUniqueNameValidator
+from .utils.manager_utils import SearchResult
+from .managers import ProductManager, CategoryManagers
 
 
 def json_default():
@@ -47,6 +49,9 @@ cross_model_validator = CrossModelUniqueNameValidator(UniqueCategory)
 
 # Abstract model for categories
 class CategoriesAbstractModel(models.Model):
+
+    objects = CategoryManagers()
+
     def save(self, *args, **kwargs):
         # When creating model instances from the application or shell, full_clean method
         # which validates field input is bypassed. This hook ensures it's still checked
@@ -56,18 +61,6 @@ class CategoriesAbstractModel(models.Model):
 
     class Meta:
         abstract = True
-
-
-# Abstract model for join models
-# class ModelJoinAbstractModel(models.Model):
-#     """
-#     All join models have this field.
-#     """
-#
-#     # hash_field = models.IntegerField(blank=True, unique=True)
-#
-#     class Meta:
-#         abstract = True
 
 
 # Category
@@ -269,6 +262,14 @@ class Subcat2BoughtTogetherJoin(models.Model):
         ]
 
 
+def search_all_categories(value) -> Union[SearchResult, None]:
+    all_categories = [Category, SubCategory1, SubCategory2]
+    for cat in all_categories:
+        result = cat.objects.full_search(value)
+        if result:
+            return result
+
+
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True, default="Generic")
 
@@ -297,14 +298,14 @@ class ModelName(models.Model):
 class ProductAbstractModel(models.Model):
 
     cat_id = models.ForeignKey(
-        Category, models.SET_NULL, null=True,
+        Category, models.SET_NULL, null=True, related_name="products"
     )
     subcat_1_id = models.ForeignKey(
-        SubCategory1, models.SET_NULL, null=True, blank=True,
+        SubCategory1, models.SET_NULL, null=True, blank=True, related_name="products"
     )
 
     subcat_2_id = models.ForeignKey(
-        SubCategory2, models.SET_NULL, null=True, blank=True,
+        SubCategory2, models.SET_NULL, null=True, blank=True, related_name="products"
     )
 
     comes_in_pairs = models.BooleanField(default=False)
@@ -328,17 +329,19 @@ class ProductAbstractModel(models.Model):
         abstract = True
 
 
+def get_generic_brand():
+    return Brand.objects.get_or_create(name="Generic")[0]
+
+
 class Product(ProductAbstractModel):
-
     brand = models.ForeignKey(
-        Brand, on_delete=models.SET_NULL, related_name="product",
-        null=True, default="Generic"
+        Brand, on_delete=models.SET(get_generic_brand), related_name="products",
+        null=True,
     )
-
-    model_name = models.OneToOneField(
-        ModelName, on_delete=models.SET_NULL, related_name="product", null=True,
-        to_field="name",
+    model_name = models.ForeignKey(
+        ModelName, on_delete=models.SET_NULL, related_name="products", null=True, blank=True
     )
+    full_name = models.CharField(max_length=200, blank=True, null=False, unique=True)
 
     image = models.ImageField(null=True, upload_to=storage_dir, blank=True)
 
@@ -351,25 +354,29 @@ class Product(ProductAbstractModel):
     weight = models.CharField(max_length=200, null=True, blank=True,)
     date_created = models.DateTimeField(auto_now=True)
     # Todo: Enforce during model save.
+    # Todo: Might refactor into an H-store of main_f : alias
     # If specs_from_bhpv is False, map these fields
     features_alias = ArrayField(
         models.CharField(max_length=20, blank=True), default=list
     )
-    # Todo Add variants as Hstore
+    # Proper admin widget needed to facilitate this
+    variants = HStoreField(default=dict)
+
+    objects = ProductManager()
 
     def get_brand_name(self) -> str:
-        try:
-            brand_obj = Brand.objects.get(pk=self.brand.id)
-            brand_name = brand_obj.name
-        except AttributeError:
-            return "None"
-
-        return brand_name
+        brand_obj = Brand.objects.get(pk=self.brand.id)
+        return brand_obj.name
 
     def product_name(self) -> str:
         brand_name = self.get_brand_name()
+        # model_name can be null/None if deleted
+        return f"{brand_name} {self.model_name if self.model_name else ''}"
 
-        return f"{brand_name} {self.model_name}"
+    def save(self, *args, **kwargs):
+        full_name = self.product_name()
+        self.full_name = full_name
+        super().save(*args, **kwargs)
 
     def __str__(self):
         cat_name = self.return_appropriate_category()
@@ -377,5 +384,11 @@ class Product(ProductAbstractModel):
 
     class Meta:
         db_table = "products"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["brand", "model_name", "variants"], name="product_variants"
+            )
+        ]
+
 
 

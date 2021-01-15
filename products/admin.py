@@ -29,6 +29,7 @@ class ProductForm(forms.ModelForm):
     specs = FormSpecsField()
     in_the_box = FormCommaNewLineSeparatedField()
     features_alias = FormCommaNewLineSeparatedField()
+    # variants = FormCommaNewLineSeparatedField()
 
     def clean(self):
         self._validate_unique = True
@@ -99,12 +100,12 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = "__all__"
+        exclude = ["variants"]
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("product_name", "price", "short_desc")
+    list_display = ("product_name", "price", "short_desc",)
     # list_display_links = ("brand", "model_name",)
     list_editable = ("price", "short_desc")
 
