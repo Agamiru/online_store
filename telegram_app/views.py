@@ -11,6 +11,7 @@ from .messages import *
 
 def set_webhook(request):
     set_ = bot.set_webhook(webhook_url)
+    print(f"Webhook url: {webhook_url}")
     if not set_:
         # Todo: Change to Raise Configuration Error
         raise ValueError("Webhook not set")
