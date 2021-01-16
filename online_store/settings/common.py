@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
 
     # Third party apps
+    'corsheaders',
     'rest_framework',
 
     # Application apps
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -79,7 +81,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'online_store.wsgi.application'
 
-
+CORS_ALLOWED_ORIGINS = [
+    "https://herokuapp.com",
+    "https://api.telegram.org",
+    "http://localhost:8000",
+]
 
 
 
