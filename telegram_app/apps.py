@@ -5,5 +5,7 @@ class TelegramAppConfig(AppConfig):
     name = 'telegram_app'
 
     def ready(self):
-        from .utils import set_webhook
-        set_webhook()
+        from .settings import bot, webhook_url
+        set_ = bot.set_webhook(webhook_url)
+        if not set_:
+            raise ValueError("Webhook not set")
