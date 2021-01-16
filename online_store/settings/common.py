@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'common_app',
     'app_admin.apps.AppAdminConfig',
     'products.apps.ProductsConfig',
-    'telegram_app.apps.TelegramAppConfig',
+    'telegram_app',
 ]
 
 MIDDLEWARE = [
