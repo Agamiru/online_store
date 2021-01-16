@@ -36,7 +36,8 @@ def start(update):
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
 
-    bot.sendMessage(
-        chat_id=chat_id, text=start_message, reply_to_message_id=msg_id
+    bot.send_message(
+        chat_id=chat_id, text=start_message, reply_to_message_id=msg_id,
+        parse_mode="MarkdownV2"
     )
     return HttpResponse(status=status.HTTP_200_OK)
