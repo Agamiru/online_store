@@ -1,11 +1,7 @@
 from .settings import bot, webhook_url
 
 
-# def set_webhook():
-#     set_ = bot.set_webhook(webhook_url)
-#     if not set_:
-#         # Todo: Change to Raise Configuration Error
-#         raise ValueError("Webhook not set")
+
 
 
 class IncrementString:

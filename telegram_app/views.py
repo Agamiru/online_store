@@ -5,8 +5,16 @@ from django.http import HttpResponse
 
 from rest_framework import status
 
-from .settings import bot
+from .settings import bot, webhook_url
 from .messages import *
+
+
+def set_webhook(request):
+    set_ = bot.set_webhook(webhook_url)
+    if not set_:
+        # Todo: Change to Raise Configuration Error
+        raise ValueError("Webhook not set")
+    return HttpResponse("Webhook Set", status=status.HTTP_200_OK)
 
 
 def telegram_view_dispatcher(request):
