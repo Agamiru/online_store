@@ -1,6 +1,8 @@
 import telegram
 import json
 
+from django.views.decorators.csrf import csrf_exempt
+
 from django.http import HttpResponse
 
 from rest_framework import status
@@ -18,6 +20,7 @@ def set_webhook(request):
     return HttpResponse("Webhook Set", status=status.HTTP_200_OK)
 
 
+@csrf_exempt
 def telegram_view_dispatcher(request):
     json_body = json.loads(request.body)
     print(f"update: {json_body}")
