@@ -15,12 +15,11 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config("LOCAL_DB_NAME"),
-        'USER': config("LOCAL_DB_USER"),
-        'PASSWORD': config("LOCAL_DB_PASSWORD"),
-        'HOST': config("LOCAL_DB_HOST"),
+        'NAME': config("LOCAL_DB_NAME", default=""),
+        'USER': config("LOCAL_DB_USER", default=""),
+        'PASSWORD': config("LOCAL_DB_PASSWORD", default=""),
+        'HOST': config("LOCAL_DB_HOST", default=""),
         'PORT': config("LOCAL_DB_PORT", default="")
-
     }
 }
 

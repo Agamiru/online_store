@@ -16,7 +16,7 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': config("DATABASE_URL", cast=dburl)
+    'default': config("DATABASE_URL", default="", cast=dburl)
 }
 
 if os.environ.get('GITHUB_WORKFLOW'):
