@@ -41,6 +41,11 @@ jobs:
 
       - name: Run migrations
         run: python manage.py migrate
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BASE_URL: ${{ secrets.BASE_URL }}
 
       - name: Run tests
         run: python manage.py test
