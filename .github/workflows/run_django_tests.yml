@@ -5,6 +5,7 @@ on:
     branches:
       - development
       - staging
+      - production
 
 jobs:
   build:
