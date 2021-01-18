@@ -1,7 +1,9 @@
-from .common import *
+import os
 
 from decouple import Csv
 from dj_database_url import parse as dburl
+
+from .common import *
 
 
 
@@ -14,17 +16,17 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': config("DATABASE_URL", cast=dburl)
+    'default': config("DATABASE_URL", default="", cast=dburl)
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': config("LOCAL_DB_NAME"),
-#         'USER': config("LOCAL_DB_USER"),
-#         'PASSWORD': config("LOCAL_DB_PASSWORD"),
-#         'HOST': config("LOCAL_DB_HOST"),
-#         'PORT': config("LOCAL_DB_PORT", default="")
-#
-#     }
-# }
+if os.environ.get('GITHUB_WORKFLOW'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'github_actions',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
+    }

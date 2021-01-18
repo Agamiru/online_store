@@ -1,9 +1,13 @@
+import json
+from typing import Union
+
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist as doesnt_exist
+from django.contrib.postgres.fields import ArrayField, HStoreField
 
-# Create your models here.
-import json
-from typing import List, Tuple
+from .utils.model_utils import CrossModelUniqueNameValidator
+from .utils.manager_utils import SearchResult
+from .managers import ProductManager, CategoryManagers
 
 
 def json_default():
@@ -17,26 +21,56 @@ def storage_dir(instance, filename) -> str:
     return f"{brand_name}/{model_name}/{filename}"
 
 
-def choices_getter(model, name_field: str = "name") -> List[Tuple[str, str]]:
-    all_objects = model.objects.all()
-    if not all_objects:
-        return [("NONE", "None")]
-    choices_list = []
-    for obj in all_objects:
-        try:
-            choice = getattr(obj, name_field)
-            choices_list.append(choice)
-        except AttributeError:
-            raise AttributeError(f"Your model has no such attribute <{name_field}>")
+class UniqueCategory(models.Model):
+    """
+    Category name should be unique even across different category models,
+    this model is used as a backend for the cross_model_validator (see below)
+    to validate names as unique before saving.
 
-    choices_list = [(choice.upper(), choice.title()) for choice in choices_list]
-    return choices_list
+    A post_save signal has been set up on all category models, to automatically
+    populate this model.
+    """
+    name = models.CharField(max_length=200, unique=True)
+    model_name = models.CharField(max_length=200)
+    cat_id = models.IntegerField(null=False)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        db_table = "unique_category"
+        constraints = [
+            models.UniqueConstraint(name="whatever", fields=["model_name", "cat_id"])
+        ]
 
 
-class Category(models.Model):
+cross_model_validator = CrossModelUniqueNameValidator(UniqueCategory)
 
-    name = models.CharField(max_length=100, unique=True, null=False)
-    alias = models.JSONField(default=json_default)
+
+# Abstract model for categories
+class CategoriesAbstractModel(models.Model):
+
+    objects = CategoryManagers()
+
+    def save(self, *args, **kwargs):
+        # When creating model instances from the application or shell, full_clean method
+        # which validates field input is bypassed. This hook ensures it's still checked
+        # before save. For forms, validation will be done twice, small price to pay.
+        cross_model_validator(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
+# Category
+class Category(CategoriesAbstractModel):
+    name = models.CharField(
+        validators=[cross_model_validator],
+        max_length=100, unique=True, null=False
+    )
+    alias = ArrayField(models.CharField(max_length=50, null=True, blank=True), default=list)
+    main_features = ArrayField(models.CharField(max_length=50, blank=False))
 
     def __str__(self):
         return f"{self.name}"
@@ -46,23 +80,6 @@ class Category(models.Model):
         verbose_name_plural = "categories"
 
 
-# A clone model used as a join for its parent model (Category)
-# This model shouldn't be directly updated, its parent model will update it.
-# The same naming scheme and function apply Subcategory1 and Subcategory2
-class CategoryDouble(models.Model):
-    cat_id = models.OneToOneField(
-        Category, on_delete=models.CASCADE,
-    )
-
-    def __str__(self):
-        cat_name = Category.objects.get(pk=self.cat_id.id).name
-        return f"{cat_name}" if self.cat_id else "Null"
-
-    class Meta:
-        db_table = "category_double"
-        verbose_name_plural = "category_double"
-
-
 # Accessories for Categories
 class CategoryAccessoryJoin(models.Model):
     cat_id = models.ForeignKey(
@@ -70,10 +87,9 @@ class CategoryAccessoryJoin(models.Model):
         blank=False,
     )
     accessory_id = models.ForeignKey(
-        CategoryDouble, on_delete=models.CASCADE, related_name="category_join",
-        blank=False, to_field="cat_id"
+        Category, on_delete=models.CASCADE, related_name="category_join",
+        blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Accessory for {self.cat_id.name}" if self.cat_id else "Null"
@@ -81,6 +97,11 @@ class CategoryAccessoryJoin(models.Model):
     class Meta:
         db_table = "category_accessories"
         verbose_name_plural = "category_accessories"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cat_id", "accessory_id"], name="cat_acc_join"
+            )
+        ]
 
 
 # Bought Together for Categories
@@ -90,10 +111,9 @@ class CategoryBoughtTogetherJoin(models.Model):
         blank=False,
     )
     bought_together_id = models.ForeignKey(
-        CategoryDouble, on_delete=models.CASCADE, related_name="bought_join",
-        blank=False, to_field="cat_id"
+        Category, on_delete=models.CASCADE, related_name="bought_join",
+        blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Frequently bought together for {self.cat_id.name}" if self.cat_id else "Null"
@@ -101,30 +121,24 @@ class CategoryBoughtTogetherJoin(models.Model):
     class Meta:
         db_table = "category_bought_together"
         verbose_name_plural = "category_bought_together"
-
-
-# Main Features for Categories
-class CategoryMainFeatures(models.Model):
-    cat_id = models.OneToOneField(
-        Category, on_delete=models.CASCADE, related_name="main_features"
-    )
-    features = models.JSONField(default=json_default)
-
-    def __str__(self):
-        return f"{self.cat_id.name} Main Features"
-
-    class Meta:
-        db_table = "category_main_features"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cat_id", "bought_together_id"], name="cat_b2g_join"
+            )
+        ]
 
 
 # Subcategory 1
-class SubCategory1(models.Model):
-
+class SubCategory1(CategoriesAbstractModel):
     cat_id = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name="subcategory_1", null=True
     )
-    name = models.CharField(max_length=100, unique=True, null=False)
-    alias = models.JSONField(default=json_default)
+    name = models.CharField(
+        validators=[cross_model_validator],
+        max_length=100, unique=True, null=False
+    )
+    alias = ArrayField(models.CharField(max_length=50, blank=True), default=list)
+    main_features = ArrayField(models.CharField(max_length=50, blank=True), default=list)
 
     def __str__(self):
         return f"{self.name}"
@@ -134,20 +148,6 @@ class SubCategory1(models.Model):
         verbose_name_plural = "subcategories_1"
 
 
-class Subcat1Double(models.Model):
-    subcat_1_id = models.OneToOneField(
-        SubCategory1, on_delete=models.CASCADE,
-    )
-
-    def __str__(self):
-        sub_cat_name = SubCategory1.objects.get(pk=self.subcat_1_id.id).name
-        return f"{sub_cat_name}" if self.subcat_1_id else "Null"
-
-    class Meta:
-        db_table = "subcategory_1_double"
-        verbose_name_plural = "subcategory_1_double"
-
-
 class Subcat1AccessoryJoin(models.Model):
 
     subcat_1_id = models.ForeignKey(
@@ -155,10 +155,9 @@ class Subcat1AccessoryJoin(models.Model):
         blank=False,
     )
     accessory_id = models.ForeignKey(
-        Subcat1Double, on_delete=models.CASCADE, related_name="category_join",
-        blank=False, to_field="subcat_1_id"
+        SubCategory1, on_delete=models.CASCADE, related_name="category_join",
+        blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Accessory for {self.subcat_1_id.name}" if self.subcat_1_id else "Null"
@@ -166,6 +165,11 @@ class Subcat1AccessoryJoin(models.Model):
     class Meta:
         db_table = "subcategory_1_accessories"
         verbose_name_plural = "subcategory_1_accessories"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_1_id", "accessory_id"], name="subcat1_acc_join"
+            )
+        ]
 
 
 class Subcat1BoughtTogetherJoin(models.Model):
@@ -174,10 +178,9 @@ class Subcat1BoughtTogetherJoin(models.Model):
         blank=False,
     )
     bought_together_id = models.ForeignKey(
-        Subcat1Double, on_delete=models.CASCADE, related_name="bought_join",
-        blank=False, to_field="subcat_1_id"
+        SubCategory1, on_delete=models.CASCADE, related_name="bought_join",
+        blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Frequently bought together for {self.subcat_1_id.name}" if self.subcat_1_id else "Null"
@@ -185,30 +188,24 @@ class Subcat1BoughtTogetherJoin(models.Model):
     class Meta:
         db_table = "subcategory_1_bought_together"
         verbose_name_plural = "subcategory_1_bought_together"
-
-
-# Main Features for SubCategory1
-class SubCategory1MainFeatures(models.Model):
-    subcat_1_id = models.OneToOneField(
-        SubCategory1, on_delete=models.CASCADE, related_name="main_features"
-    )
-    features = models.JSONField(default=json_default)
-
-    def __str__(self):
-        return f"{self.subcat_1_id.name} Main Features"
-
-    class Meta:
-        db_table = "Subcategory1_main_features"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_1_id", "bought_together_id"], name="subcat1_b2g_join"
+            )
+        ]
 
 
 # Subcategory 2
-class SubCategory2(models.Model):
-
+class SubCategory2(CategoriesAbstractModel):
     subcat_1_id = models.ForeignKey(
         SubCategory1, on_delete=models.SET_NULL, related_name="subcategory_2", null=True
     )
-    name = models.CharField(max_length=100, unique=True, null=False)
-    alias = models.JSONField(default=json_default)
+    name = models.CharField(
+        validators=[cross_model_validator],
+        max_length=100, unique=True, null=False
+    )
+    alias = ArrayField(models.CharField(max_length=50, blank=True), default=list)
+    main_features = ArrayField(models.CharField(max_length=50, blank=True), default=list)
 
     def __str__(self):
         return f"{self.name}"
@@ -218,20 +215,6 @@ class SubCategory2(models.Model):
         verbose_name_plural = "subcategories_2"
 
 
-class Subcat2Double(models.Model):
-    subcat_2_id = models.OneToOneField(
-        SubCategory2, on_delete=models.CASCADE,
-    )
-
-    def __str__(self):
-        sub_cat_name = SubCategory2.objects.get(pk=self.subcat_2_id.id).name
-        return f"{sub_cat_name}" if self.subcat_2_id else "Null"
-
-    class Meta:
-        db_table = "subcategory_2_double"
-        verbose_name_plural = "subcategory_2_double"
-
-
 class Subcat2AccessoryJoin(models.Model):
 
     subcat_2_id = models.ForeignKey(
@@ -239,10 +222,9 @@ class Subcat2AccessoryJoin(models.Model):
         blank=False,
     )
     accessory_id = models.ForeignKey(
-        Subcat2Double, on_delete=models.CASCADE, related_name="category_join",
-        blank=False, to_field="subcat_2_id"
+        SubCategory2, on_delete=models.CASCADE, related_name="category_join",
+        blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Accessory for {self.subcat_2_id.name}" if self.subcat_2_id else "Null"
@@ -250,6 +232,11 @@ class Subcat2AccessoryJoin(models.Model):
     class Meta:
         db_table = "subcategory_2_accessories"
         verbose_name_plural = "subcategory_2_accessories"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_2_id", "accessory_id"], name="subcat2_acc_join"
+            )
+        ]
 
 
 class Subcat2BoughtTogetherJoin(models.Model):
@@ -258,10 +245,9 @@ class Subcat2BoughtTogetherJoin(models.Model):
         blank=False,
     )
     bought_together_id = models.ForeignKey(
-        Subcat2Double, on_delete=models.CASCADE, related_name="bought_join",
-        blank=False, to_field="subcat_2_id"
+        SubCategory2, on_delete=models.CASCADE, related_name="bought_join",
+        blank=False,
     )
-    hash_field = models.IntegerField(blank=True, unique=True)
 
     def __str__(self):
         return f"Frequently bought together for {self.subcat_2_id.name}" if self.subcat_2_id else "Null"
@@ -269,20 +255,19 @@ class Subcat2BoughtTogetherJoin(models.Model):
     class Meta:
         db_table = "subcategory_2_bought_together"
         verbose_name_plural = "subcategory_2_bought_together"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subcat_2_id", "bought_together_id"], name="subcat2_b2g_join"
+            )
+        ]
 
 
-# Main Features for SubCategory2
-class SubCategory2MainFeatures(models.Model):
-    subcat_2_id = models.OneToOneField(
-        SubCategory2, on_delete=models.CASCADE, related_name="main_features"
-    )
-    features = models.JSONField(default=json_default)
-
-    def __str__(self):
-        return f"{self.subcat_2_id.name} Main Features"
-
-    class Meta:
-        db_table = "Subcategory2_main_features"
+def search_all_categories(value) -> Union[SearchResult, None]:
+    all_categories = [Category, SubCategory1, SubCategory2]
+    for cat in all_categories:
+        result = cat.objects.full_search(value)
+        if result:
+            return result
 
 
 class Brand(models.Model):
@@ -309,20 +294,22 @@ class ModelName(models.Model):
         db_table = "model_name"
 
 
-class AbstractModel(models.Model):
+# Abstract model for Products
+class ProductAbstractModel(models.Model):
 
     cat_id = models.ForeignKey(
-        Category, models.SET_NULL, null=True,
+        Category, models.SET_NULL, null=True, related_name="products"
     )
     subcat_1_id = models.ForeignKey(
-        SubCategory1, models.SET_NULL, null=True, blank=True,
+        SubCategory1, models.SET_NULL, null=True, blank=True, related_name="products"
     )
 
     subcat_2_id = models.ForeignKey(
-        SubCategory2, models.SET_NULL, null=True, blank=True,
+        SubCategory2, models.SET_NULL, null=True, blank=True, related_name="products"
     )
 
     comes_in_pairs = models.BooleanField(default=False)
+    specs_from_bhpv = models.BooleanField(default=True)
 
     def return_appropriate_category(self):
         try:
@@ -342,30 +329,19 @@ class AbstractModel(models.Model):
         abstract = True
 
 
-# class MainFeatures(AbstractModel):
-#
-#     _features = models.JSONField(default=json_default)
-#
-#     def __str__(self):
-#         cat_name = self.return_appropriate_category()
-#         return f"Main Features for '{cat_name}'"
-#
-#     class Meta:
-#         db_table = "_features"
+def get_generic_brand():
+    return Brand.objects.get_or_create(name="Generic")[0]
 
 
-# Todo: Create an admin page for adding products
-class Product(AbstractModel):
-
+class Product(ProductAbstractModel):
     brand = models.ForeignKey(
-        Brand, on_delete=models.SET_NULL, related_name="product",
-        null=True, default="Generic"
+        Brand, on_delete=models.SET(get_generic_brand), related_name="products",
+        null=True,
     )
-
-    model_name = models.OneToOneField(
-        ModelName, on_delete=models.SET_NULL, related_name="product", null=True,
-        to_field="name",
+    model_name = models.ForeignKey(
+        ModelName, on_delete=models.SET_NULL, related_name="products", null=True, blank=True
     )
+    full_name = models.CharField(max_length=200, blank=True, null=False, unique=True)
 
     image = models.ImageField(null=True, upload_to=storage_dir, blank=True)
 
@@ -377,20 +353,30 @@ class Product(AbstractModel):
     package_dimensions = models.CharField(max_length=200, null=True, blank=True,)
     weight = models.CharField(max_length=200, null=True, blank=True,)
     date_created = models.DateTimeField(auto_now=True)
+    # Todo: Enforce during model save.
+    # Todo: Might refactor into an H-store of main_f : alias
+    # If specs_from_bhpv is False, map these fields
+    features_alias = ArrayField(
+        models.CharField(max_length=20, blank=True), default=list
+    )
+    # Proper admin widget needed to facilitate this
+    variants = HStoreField(default=dict)
+
+    objects = ProductManager()
 
     def get_brand_name(self) -> str:
-        try:
-            brand_obj = Brand.objects.get(pk=self.brand.id)
-            brand_name = brand_obj.name
-        except AttributeError:
-            return "None"
-
-        return brand_name
+        brand_obj = Brand.objects.get(pk=self.brand.id)
+        return brand_obj.name
 
     def product_name(self) -> str:
         brand_name = self.get_brand_name()
+        # model_name can be null/None if deleted
+        return f"{brand_name} {self.model_name if self.model_name else ''}"
 
-        return f"{brand_name} {self.model_name}"
+    def save(self, *args, **kwargs):
+        full_name = self.product_name()
+        self.full_name = full_name
+        super().save(*args, **kwargs)
 
     def __str__(self):
         cat_name = self.return_appropriate_category()
@@ -398,5 +384,11 @@ class Product(AbstractModel):
 
     class Meta:
         db_table = "products"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["brand", "model_name", "variants"], name="product_variants"
+            )
+        ]
+
 
 

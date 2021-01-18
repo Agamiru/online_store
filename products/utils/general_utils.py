@@ -51,7 +51,11 @@ class BhphotovideoTableConverter:
         assert len(values_list) == len(table_data), "Things aren't adding up"
 
         final_dict = self._spec_values_dict(table_data, values_list)
-        self.final_dict = final_dict
+        try:
+            json.dumps(final_dict)
+            self.final_dict = final_dict
+        except json.JSONDecodeError:
+            raise TypeError("object not properly configured")
 
     def to_python_dict(self):
         if self.final_dict:
