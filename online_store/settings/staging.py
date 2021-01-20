@@ -15,11 +15,8 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    # Default "" not to raise errors during running on github servers
-    'default': config("DATABASE_URL", default="", cast=dburl)
-}
 
+# Only git hub environs have this env var, for github actions
 if os.environ.get('GITHUB_WORKFLOW'):
     DATABASES = {
         'default': {
@@ -30,4 +27,10 @@ if os.environ.get('GITHUB_WORKFLOW'):
             'HOST': '127.0.0.1',
             'PORT': '5432',
         }
+    }
+
+# Use staging server database url
+else:
+    DATABASES = {
+        'default': config("DATABASE_URL", cast=dburl)
     }
