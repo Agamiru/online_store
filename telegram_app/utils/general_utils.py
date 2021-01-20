@@ -1,10 +1,19 @@
-from .settings import bot, webhook_url
+import json
+
+import telegram
 
 
+def get_update_obj(request, bot_inst):
 
+    update = json.loads(request.body)
+    print(f"update: {update}")
+    return telegram.Update.de_json(update, bot_inst)
 
 
 class IncrementString:
+    """
+    Appends a number to a string and increments the number
+    """
     def __init__(self, string, start_num=0):
         self.string = string
         self.start_num = start_num

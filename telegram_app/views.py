@@ -9,6 +9,7 @@ from rest_framework import status
 
 from .settings import bot, webhook_url
 from .messages import *
+from .utils.general_utils import get_update_obj
 
 
 def set_webhook(request):
@@ -22,10 +23,7 @@ def set_webhook(request):
 
 @csrf_exempt
 def telegram_view_dispatcher(request):
-    json_body = json.loads(request.body)
-    print(f"update: {json_body}")
-    update = telegram.Update.de_json(json_body, bot)
-
+    update = get_update_obj(request, bot)
     text = update.message.text.encode("utf-8").decode()
 
     if text == "/start":

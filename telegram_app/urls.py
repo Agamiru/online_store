@@ -6,5 +6,5 @@ from .settings import BOT_TOKEN
 
 urlpatterns = [
     path(f"{BOT_TOKEN}/", telegram_view_dispatcher),
-    path("set-webhook/", set_webhook)
+    path(f"{BOT_TOKEN}/set-webhook/", set_webhook)
 ]
