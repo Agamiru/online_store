@@ -16,6 +16,7 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
+    # Default "" not to raise errors during running on github servers
     'default': config("DATABASE_URL", default="", cast=dburl)
 }
 
