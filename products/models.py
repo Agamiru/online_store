@@ -339,7 +339,7 @@ class Product(ProductAbstractModel):
         null=True,
     )
     model_name = models.ForeignKey(
-        ModelName, on_delete=models.SET_NULL, related_name="products", null=True, blank=True
+        ModelName, on_delete=models.SET_NULL, related_name="products", null=True,
     )
     full_name = models.CharField(max_length=200, blank=True, null=False, unique=True)
 

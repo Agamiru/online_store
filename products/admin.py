@@ -100,7 +100,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        exclude = ["variants"]
+        fields = "__all__"
 
 
 @admin.register(Product)
