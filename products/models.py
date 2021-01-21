@@ -307,7 +307,13 @@ class ProductAbstractModel(models.Model):
     subcat_2_id = models.ForeignKey(
         SubCategory2, models.SET_NULL, null=True, blank=True, related_name="products"
     )
-
+    # Variants are used to determine the final name of the product.
+    # Sometimes a variant key might have possible multiple values, hence the product - other
+    # possible names e.g. generation can be "G3, 3rd Gen, 3G, Gen 3, or 3rd Generation"
+    # This field stores those names for search purposes.
+    # other_possible_names = ArrayField(
+    #     models.CharField(max_length=20, blank=True), default=list
+    # )
     comes_in_pairs = models.BooleanField(default=False)
     specs_from_bhpv = models.BooleanField(default=True)
 
@@ -332,7 +338,7 @@ class ProductAbstractModel(models.Model):
 def get_generic_brand():
     return Brand.objects.get_or_create(name="Generic")[0]
 
-
+# Todo: Add array field that contains other
 class Product(ProductAbstractModel):
     brand = models.ForeignKey(
         Brand, on_delete=models.SET(get_generic_brand), related_name="products",
@@ -346,6 +352,7 @@ class Product(ProductAbstractModel):
     image = models.ImageField(null=True, upload_to=storage_dir, blank=True)
 
     short_desc = models.CharField("Short Description", max_length=200)
+    # Todo add a comma separated price field in admin_utils, hint: use regex
     price = models.FloatField(null=False)
     available = models.BooleanField(default=True)
     in_the_box = models.JSONField(default=json_default)
@@ -360,6 +367,7 @@ class Product(ProductAbstractModel):
         models.CharField(max_length=20, blank=True), default=list
     )
     # Proper admin widget needed to facilitate this
+    # Todo: Ensure value for keys like 'generation', 'version' etc are properly inputed in admin
     variants = HStoreField(default=dict)
 
     objects = ProductManager()

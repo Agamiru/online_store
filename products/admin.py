@@ -8,12 +8,12 @@ from .models import (
 )
 
 from django import forms
-from django.forms.widgets import TextInput
+from django.forms import fields
 from django.core.exceptions import ValidationError, ObjectDoesNotExist as doesntExist
-from django.forms.models import ModelForm
 
 from .utils.admin_utils import (
-    FormSpecsField, FormCommaNewLineSeparatedField, AbstractJoinForm
+    FormSpecsField, FormCommaNewLineSeparatedField, AbstractJoinForm,
+    CustomHstoreField, AbstractCategoryForm
 )
 
 ################### PRODUCT ######################
@@ -28,8 +28,9 @@ class ProductForm(forms.ModelForm):
 
     specs = FormSpecsField()
     in_the_box = FormCommaNewLineSeparatedField()
-    features_alias = FormCommaNewLineSeparatedField()
-    # variants = FormCommaNewLineSeparatedField()
+    features_alias = FormCommaNewLineSeparatedField(required=False)
+    full_name = fields.CharField(disabled=True, required=False)
+    variants = CustomHstoreField(required=False)
 
     def clean(self):
         self._validate_unique = True
@@ -114,8 +115,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 ###################### CATEGORY #######################
 
-class CategoryForm(ModelForm):
-    alias = FormCommaNewLineSeparatedField()
+class CategoryForm(AbstractCategoryForm):
     main_features = FormCommaNewLineSeparatedField()
 
     class Meta:
@@ -129,14 +129,12 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class CategoryAccessoryJoinForm(AbstractJoinForm):
-
     class Meta:
         model = CategoryAccessoryJoin
         fields = "__all__"
 
 
 class CategoryBoughtTogetherJoinForm(AbstractJoinForm):
-
     class Meta:
         model = CategoryBoughtTogetherJoin
         fields = "__all__"
@@ -154,10 +152,7 @@ class CategoryBoughtTogetherJoinAdmin(admin.ModelAdmin):
 
 ################# SUB CATEGORY 1 #########################
 
-class SubCategory1Form(ModelForm):
-    alias = FormCommaNewLineSeparatedField()
-    main_features = FormCommaNewLineSeparatedField()
-
+class SubCategory1Form(AbstractCategoryForm):
     class Meta:
         model = SubCategory1
         fields = "__all__"
@@ -169,18 +164,15 @@ class Subcat1Admin(admin.ModelAdmin):
 
 
 class Subcat1AccessoryJoinForm(AbstractJoinForm):
-
     class Meta:
         model = Subcat1AccessoryJoin
         fields = "__all__"
 
 
 class Subcat1BoughtTogetherJoinForm(AbstractJoinForm):
-
     class Meta:
         model = Subcat1BoughtTogetherJoin
         fields = "__all__"
-
 
 
 @admin.register(Subcat1AccessoryJoin)
@@ -195,10 +187,7 @@ class Subcat1BoughtTogetherJoinAdmin(admin.ModelAdmin):
 
 ################# SUB CATEGORY 2 #########################
 
-class SubCategory2Form(ModelForm):
-    alias = FormCommaNewLineSeparatedField()
-    main_features = FormCommaNewLineSeparatedField()
-
+class SubCategory2Form(AbstractCategoryForm):
     class Meta:
         model = SubCategory2
         fields = "__all__"
@@ -210,14 +199,12 @@ class Subcat2Admin(admin.ModelAdmin):
 
 
 class Subcat2AccessoryJoinForm(AbstractJoinForm):
-
     class Meta:
         model = Subcat2AccessoryJoin
         fields = "__all__"
 
 
 class Subcat2BoughtTogetherJoinForm(AbstractJoinForm):
-
     class Meta:
         model = Subcat2BoughtTogetherJoin
         fields = "__all__"

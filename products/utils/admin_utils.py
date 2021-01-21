@@ -6,6 +6,8 @@ from django import forms
 from django.forms.widgets import Textarea
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelForm, ModelFormMetaclass
+from django.contrib.postgres.forms import HStoreField
+from django.contrib.postgres.forms import HStoreField
 
 
 from ..utils.general_utils import BhphotovideoTableConverter
@@ -38,8 +40,10 @@ class FormSpecsField(fields.JSONField):
                     code='invalid',
                     params={'value': value},
                 )
+        if value.startswith("{") and value.endswith("}"):
+            return "in_database"
 
-        return "in_database"
+        raise ValidationError("Invalid input type")
 
     def prepare_value(self, value):
         if value is None:
@@ -81,12 +85,24 @@ class FormCommaNewLineSeparatedField(fields.JSONField):
         return ', '.join(value)
 
 
+class CustomHstoreField(HStoreField):
+    widget = Textarea(attrs={"placeholder": "Please insert a 'key':'value' dictionary"})
+
+    # For aesthetics: If value is an empty dict, return placeholder value instead
+    def prepare_value(self, value):
+        if not value:
+            return
+        if isinstance(value, dict):
+            return json.dumps(value)
+
+
 class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):
     """
     A model form maker where categories and subcategories join models can inherit
     special form cleaning and validation abilities on the admin page.
     """
 
+    # A product cannot be an accessory or be bought together with itself.
     def clean(self):
         self._validate_unique = True
 
@@ -111,3 +127,12 @@ class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):
         second_field_name = self._meta.model()._meta.fields[2].name
 
         return first_field_name, second_field_name
+
+
+class AbstractCategoryForm(BaseModelForm, metaclass=ModelFormMetaclass):
+    """
+    A model form maker where categories and subcategories models can inherit
+    special form fields to avoid duplication.
+    """
+    alias = FormCommaNewLineSeparatedField(required=False)
+    main_features = FormCommaNewLineSeparatedField(required=False)
