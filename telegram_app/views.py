@@ -23,7 +23,7 @@ def set_webhook(request):
     if not set_:
         # Todo: Change to Raise Configuration Error
         raise ValueError("Webhook not set")
-    return HttpResponse("Webhook Set", status=status.HTTP_200_OK)
+    return HttpResponse(f"Webhook set to: {webhook_url}", status=status.HTTP_200_OK)
 
 
 @csrf_exempt

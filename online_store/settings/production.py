@@ -1,6 +1,5 @@
 import os
 
-from decouple import Csv
 from dj_database_url import parse as dburl
 
 from .common import *

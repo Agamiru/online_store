@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 
-from decouple import config
+from decouple import config, Csv
 import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -86,6 +86,10 @@ CORS_ALLOWED_ORIGINS = [
     "https://api.telegram.org",
     "http://localhost:8000",
 ]
+
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^http[s]?://\w+\.ngrok\.io$",
+# ]
 
 
 
