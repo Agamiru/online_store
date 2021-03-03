@@ -1,13 +1,13 @@
 import json
-import zlib
+from typing import Iterable, Optional
 
 from django.forms import fields
 from django import forms
-from django.forms.widgets import Textarea
+from django.forms import widgets
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelForm, ModelFormMetaclass
 from django.contrib.postgres.forms import HStoreField
-from django.contrib.postgres.forms import HStoreField
+from django.core.validators import URLValidator
 
 
 from ..utils.general_utils import BhphotovideoTableConverter
@@ -19,7 +19,7 @@ class FormSpecsField(fields.JSONField):
     # 2. Value comes in HTML, convert to JSON compatible python type and return.
     # 3. Value is string from database, return "in_database".
 
-    widget = Textarea(attrs={
+    widget = widgets.Textarea(attrs={
         "placeholder": "Insert HTML specs here",
     })
 
@@ -54,7 +54,7 @@ class FormSpecsField(fields.JSONField):
 
 
 class FormCommaNewLineSeparatedField(fields.JSONField):
-    widget = Textarea(attrs={
+    widget = widgets.Textarea(attrs={
         "placeholder": "Comma or new line separated values",
     })
 
@@ -85,15 +85,55 @@ class FormCommaNewLineSeparatedField(fields.JSONField):
         return ', '.join(value)
 
 
+class CustomUrlField(fields.URLField):
+    # Set to null rather than empty strings.
+    # Product model URL Fields are nullable.
+    def to_python(self, value):
+        if value == "":
+            return None
+        return value
+
+
+class MultiWidgetForHstore(widgets.MultiWidget):
+    """
+    Key/value multi widgets for HStore Fields
+    """
+    def __init__(self, widgets_: Optional[Iterable] = None, **kwargs):
+        widgets_ = [
+            widgets.TextInput(attrs={"placeholder": "Insert Key"}),
+            widgets.TextInput(attrs={"placeholder": "Insert Value"}),
+        ] if widgets_ is None else widgets_
+        super().__init__(widgets_, **kwargs)
+
+    def decompress(self, value):    # decompress stored database format to HTML form format
+        if isinstance(value, dict):
+            for k, v in value.items():  # Since its just one item to iterate over
+                return k, v
+        return None, None
+
+    def value_from_datadict(self, data, files, name):
+        key, val = super().value_from_datadict(data, files, name)
+        return {key: val}
+
+
 class CustomHstoreField(HStoreField):
-    widget = Textarea(attrs={"placeholder": "Please insert a 'key':'value' dictionary"})
+    """
+    Custom HStore Field with key and value widgets
+    """
+
+    widget = MultiWidgetForHstore()
+
+    def to_python(self, value):
+        if isinstance(value, ValidationError):
+            raise value
+        return super().to_python(value)
 
     # For aesthetics: If value is an empty dict, return placeholder value instead
     def prepare_value(self, value):
         if not value:
             return
         if isinstance(value, dict):
-            return json.dumps(value)
+            return value
 
 
 class AbstractJoinForm(BaseModelForm, metaclass=ModelFormMetaclass):

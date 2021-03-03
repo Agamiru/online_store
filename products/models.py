@@ -1,13 +1,17 @@
 import json
-from typing import Union
+from typing import Union, Optional, Type
 
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist as doesnt_exist
 from django.contrib.postgres.fields import ArrayField, HStoreField
+from django.db.models import QuerySet
 
 from .utils.model_utils import CrossModelUniqueNameValidator
 from .utils.manager_utils import SearchResult
 from .managers import ProductManager, CategoryManagers
+
+
+queryset = Union[Type[QuerySet], QuerySet]    # Can be Subtype or Instance of Queryset
 
 
 def json_default():
@@ -51,6 +55,11 @@ cross_model_validator = CrossModelUniqueNameValidator(UniqueCategory)
 class CategoriesAbstractModel(models.Model):
 
     objects = CategoryManagers()
+
+    # Gets all products associated to this category object
+    def get_product_list(self, related_name: str = "products") -> Optional[queryset]:
+        if hasattr(self, related_name):
+            return getattr(self, related_name).all()
 
     def save(self, *args, **kwargs):
         # When creating model instances from the application or shell, full_clean method
@@ -317,7 +326,7 @@ class ProductAbstractModel(models.Model):
     comes_in_pairs = models.BooleanField(default=False)
     specs_from_bhpv = models.BooleanField(default=True)
 
-    def return_appropriate_category(self):
+    def return_appropriate_category_name(self):
         try:
             sub_cat_2_name = self.subcat_2_id.name
             return sub_cat_2_name
@@ -338,6 +347,7 @@ class ProductAbstractModel(models.Model):
 def get_generic_brand():
     return Brand.objects.get_or_create(name="Generic")[0]
 
+
 # Todo: Add array field that contains other
 class Product(ProductAbstractModel):
     brand = models.ForeignKey(
@@ -349,7 +359,10 @@ class Product(ProductAbstractModel):
     )
     full_name = models.CharField(max_length=200, blank=True, null=False, unique=True)
 
-    image = models.ImageField(null=True, upload_to=storage_dir, blank=True)
+    # Images, stored on Cloudinary servers
+    image_1 = models.URLField(null=True, unique=True)
+    image_2 = models.URLField(null=True, unique=True)
+    image_3 = models.URLField(null=True, unique=True)
 
     short_desc = models.CharField("Short Description", max_length=200)
     # Todo add a comma separated price field in admin_utils, hint: use regex
@@ -387,7 +400,7 @@ class Product(ProductAbstractModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        cat_name = self.return_appropriate_category()
+        cat_name = self.return_appropriate_category_name()
         return f"{self.product_name()} in {cat_name}"
 
     class Meta:

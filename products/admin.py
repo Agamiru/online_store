@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist as doesnt
 
 from .utils.admin_utils import (
     FormSpecsField, FormCommaNewLineSeparatedField, AbstractJoinForm,
-    CustomHstoreField, AbstractCategoryForm
+    CustomHstoreField, AbstractCategoryForm, CustomHstoreField, CustomUrlField
 )
 
 ################### PRODUCT ######################
@@ -31,6 +31,9 @@ class ProductForm(forms.ModelForm):
     features_alias = FormCommaNewLineSeparatedField(required=False)
     full_name = fields.CharField(disabled=True, required=False)
     variants = CustomHstoreField(required=False)
+    image_1 = CustomUrlField(required=False)
+    image_2 = CustomUrlField(required=False)
+    image_3 = CustomUrlField(required=False)
 
     def clean(self):
         self._validate_unique = True

@@ -1,10 +1,9 @@
-from typing import Union, Type, Tuple
+from typing import Union, Type, Optional, List, TypeVar, Iterable
 
 from django.db import models
 from django.db.models import ObjectDoesNotExist as doesnt_exist
 from django.contrib.postgres.search import TrigramSimilarity, TrigramDistance
-from django.db.models import CharField
-from django.db.models.functions import Cast
+from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import QuerySet, Func, F
 
 from .utils.manager_utils import SearchResult
@@ -12,6 +11,7 @@ from .utils.manager_utils import SearchResult
 # Types
 queryset = Union[Type[QuerySet], QuerySet]    # Can be Subtype or Instance of Queryset
 django_model = Type[models.Model]     # Subtype of models.Model
+prod_obj = TypeVar("prod_obj", bound=models.Model)
 
 
 class ProductManager(models.Manager):
@@ -45,20 +45,21 @@ class ProductManager(models.Manager):
         return SearchResult(res, field, "trigram", distance=dist_value)
 
     # Basically a way to get a single object without a try/except block
-    def get_obj_or_none(self, value, field="full_name") -> Union[django_model, None]:
+    def get_obj_or_none(self, value, field="full_name") -> Optional[django_model]:
         dict_ = {field: value}
         try:
             obj = self.get(**dict_)
-        except doesnt_exist:
+        except (doesnt_exist, MultipleObjectsReturned):
             return None
         else:
             return obj
 
+    # Return only available products
     @staticmethod
     def filter_available(query_set: queryset) -> queryset:
         return query_set.filter(available=True)
 
-    def full_search(self, value) -> Union[SearchResult, None]:
+    def full_search(self, value) -> Optional[SearchResult]:
         # Search for exact object if user is knowledgeable of item
         res = self.filter_available(self.filter(full_name=value))
         if res:
@@ -106,16 +107,16 @@ class CategoryManagers(models.Manager):
         return SearchResult(res, field, "trigram", distance=dist_value)
 
     # Basically a way to get a single object without a try/except block
-    def get_obj_or_none(self, value, field="name"):
+    def get_obj_or_none(self, value, field="name") -> Optional[django_model]:
         dict_ = {field: value}
         try:
             obj = self.get(**dict_)
-        except doesnt_exist:
+        except (doesnt_exist, MultipleObjectsReturned):
             return None
         else:
             return obj
 
-    def full_search(self, value) -> Union[SearchResult, None]:
+    def full_search(self, value) -> Optional[SearchResult]:
         # Search for exact object if user is knowledgeable of item
         res = self.filter(name=value)
         if res:

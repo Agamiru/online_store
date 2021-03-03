@@ -27,5 +27,6 @@ def index(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", index, name="index"),
-    path("telegram/", include("telegram_app.urls"))
+    path("telegram/", include("telegram_app.urls")),
+    path("products/", include("products.urls")),
 ]
