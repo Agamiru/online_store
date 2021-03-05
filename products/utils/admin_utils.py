@@ -1,5 +1,5 @@
 import json
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 
 from django.forms import fields
 from django import forms
@@ -9,8 +9,22 @@ from django.forms.models import BaseModelForm, ModelFormMetaclass
 from django.contrib.postgres.forms import HStoreField
 from django.core.validators import URLValidator
 
-
 from ..utils.general_utils import BhphotovideoTableConverter
+
+
+def create_pub_ids(
+        brand: str, model_name: str, var_values: list) -> Tuple[str, str, str]:
+    """
+    Returns public ids for product images.
+    If variants are available, include them else, ignore them.
+    It only caters for one variant for now.
+    It is naive of whether image urls actually exists for these fields.
+    """
+    _ = f"{brand}/{model_name}"  # Just to keep things short
+    if var_values:
+        var = var_values[0]
+        return f"{_}/{var}/image_1", f"{_}/{var}/image_2", f"{_}/{var}/image_3"
+    return f"{_}/image_1", f"{_}/image_2", f"{_}/image_3"
 
 
 class FormSpecsField(fields.JSONField):
@@ -111,9 +125,10 @@ class MultiWidgetForHstore(widgets.MultiWidget):
                 return k, v
         return None, None
 
+    # Value sent to Field's `clean` method.
     def value_from_datadict(self, data, files, name):
         key, val = super().value_from_datadict(data, files, name)
-        return {key: val}
+        return {} if (key and val) == "" else {key: val}
 
 
 class CustomHstoreField(HStoreField):
@@ -123,12 +138,7 @@ class CustomHstoreField(HStoreField):
 
     widget = MultiWidgetForHstore()
 
-    def to_python(self, value):
-        if isinstance(value, ValidationError):
-            raise value
-        return super().to_python(value)
-
-    # For aesthetics: If value is an empty dict, return placeholder value instead
+    # For aesthetics: Return placeholder value instead of empty curly braces
     def prepare_value(self, value):
         if not value:
             return

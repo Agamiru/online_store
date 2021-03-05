@@ -352,11 +352,12 @@ def get_generic_brand():
 class Product(ProductAbstractModel):
     brand = models.ForeignKey(
         Brand, on_delete=models.SET(get_generic_brand), related_name="products",
-        null=True,
+        null=False,
     )
     model_name = models.ForeignKey(
         ModelName, on_delete=models.SET_NULL, related_name="products", null=True,
     )
+    # Field used for searches, should be indexed
     full_name = models.CharField(max_length=200, blank=True, null=False, unique=True)
 
     # Images, stored on Cloudinary servers
@@ -389,13 +390,16 @@ class Product(ProductAbstractModel):
         brand_obj = Brand.objects.get(pk=self.brand.id)
         return brand_obj.name
 
-    def product_name(self) -> str:
+    def product_name(self, variants_=True) -> str:
         brand_name = self.get_brand_name()
+        variants = [v for v in self.variants.values()]
+        variants = "" if not variants else f"({variants[0]})"
         # model_name can be null/None if deleted
-        return f"{brand_name} {self.model_name if self.model_name else ''}"
+        return f"{brand_name} {self.model_name if self.model_name else ''} {variants if variants_ else ''}"
 
     def save(self, *args, **kwargs):
-        full_name = self.product_name()
+        # Searches will perform better without these extra strings
+        full_name = self.product_name(variants_=False)
         self.full_name = full_name
         super().save(*args, **kwargs)
 

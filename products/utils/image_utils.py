@@ -1,11 +1,44 @@
-#
-#
-#
+from typing import Union
+
+from django.db import models
+from django.conf import settings
+
+import cloudinary
+from cloudinary import uploader
+
 # CLOUDINARY_SECRET = settings.CLOUDINARY.get("api_secret")
 #
 # django_model = models.Model
-#
-#
+
+cloudinary.config(**settings.CLOUDINARY)
+
+path_or_url = Union[str, bytes]
+response_or_error = Union[dict, cloudinary.exceptions.Error]
+
+
+# Generic uploader for cloudnary images
+def upload_image_or_error(image: path_or_url, public_id: str) -> response_or_error:
+
+    upload_kwargs = {
+        "file": image, "public_id": public_id,
+        "type": "upload", "access_mode": "public",
+        "allowed_formats": ["jpg", "png"], "invalidate": True
+    }
+    try:
+        return uploader.upload(**upload_kwargs)
+    except cloudinary.exceptions.Error as e:
+        return e
+
+
+
+
+
+
+
+
+
+
+
 # def get_cloudinary_notification_headers(request) -> Dict[str, Union[str, None]]:
 #     # For rest_framework parsed request
 #     if hasattr(request, "data"):

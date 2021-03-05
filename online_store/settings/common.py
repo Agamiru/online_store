@@ -134,6 +134,16 @@ AUTH_USER_MODEL = "app_admin.User"
 STATIC_URL = '/static/'
 MEDIA_ROOT = 'media'
 
+# Cloudinary Settings
+
+CLOUDINARY = {
+    "cloud_name": config("CLOUDINARY_CLOUD_NAME"),
+    "api_key": config("CLOUDINARY_API_KEY"),
+    "api_secret": config("CLOUDINARY_API_SECRET"),
+}
+
+# Cloudinary Folder Structure
+# Sabigear/Brand/ModelName/Variant/FieldName
 
 # For settings for Heroku
 django_heroku.settings(locals())

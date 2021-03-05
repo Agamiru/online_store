@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.contrib import admin
 from .models import (
     Product, Brand, Category, SubCategory1,
@@ -13,9 +15,9 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist as doesnt
 
 from .utils.admin_utils import (
     FormSpecsField, FormCommaNewLineSeparatedField, AbstractJoinForm,
-    CustomHstoreField, AbstractCategoryForm, CustomHstoreField, CustomUrlField
+    AbstractCategoryForm, CustomHstoreField, CustomUrlField, create_pub_ids,
 )
-
+from .utils.image_utils import upload_image_or_error
 ################### PRODUCT ######################
 
 
@@ -38,6 +40,14 @@ class ProductForm(forms.ModelForm):
     def clean(self):
         self._validate_unique = True
         specs = self.cleaned_data.get("specs")  # Can be "in_database", json or None
+
+        # Image Processing
+        brand, model_name = self.cleaned_data["brand"], self.cleaned_data.get("model_name", "Generic")
+        # Todo: For now variants are just one dict, update to cater for more in the future
+        variants = [v for v in self.cleaned_data.get("variants", {}).values()]
+        for i, pub_id in enumerate(create_pub_ids(brand, model_name, variants)):
+            i += 1
+            self.upload_images_from_form(i, pub_id)
 
         if not specs:       # Ideally, field validations should have checked for this already
             raise ValidationError("This field receives 'None' as value")
@@ -101,6 +111,43 @@ class ProductForm(forms.ModelForm):
                 # self.add_error("weight", f"Specs has no {e}")
 
         return self.cleaned_data
+
+    def upload_images_from_form(self, idx: int, pub_id: str) -> None:
+        """
+        Checks for image urls in form, compares them with product instance version if any
+        and uploads to cloudinary servers if form img url is different or the first upload.
+        It is to be run from a loop, hence it only breaks after uploads.
+        """
+
+        # Upload to cloudinary servers or add field error
+        def upload_image_(self, img_url_, pub_id_):
+            upload_or_err = upload_image_or_error(img_url_, pub_id_)  # Returns a dict of cloudinary image details
+            if isinstance(upload_or_err, Exception):
+                self.add_error(f"image_{idx}", upload_or_err.__str__())
+            else:
+                url = upload_or_err.get("secure_url")
+                if url is None:
+                    # Remember, this automatically pops given field from self.cleaned_data
+                    self.add_error(f"image_{idx}", "This image wasn't successfully uploaded")
+                else:
+                    self.cleaned_data[f"image_{idx}"] = url
+
+        # Check form image urls for disparities with instance urls if any
+        inst_img_url = getattr(self.instance, f"image_{idx}")
+        for k, img_url in self.cleaned_data.items():
+            # Check for new product and upload as appropriate
+            if k == f"image_{idx}" and img_url is not None and \
+                    inst_img_url is None:   # Instance has no such url, first upload
+                upload_image_(self, img_url, pub_id)
+                break
+            # Check for existing product uploads
+            else:
+                if k == f"image_{idx}" and img_url is not None and \
+                        inst_img_url is not None:  # Image instance has a value for this form field
+                    # Compare images
+                    if img_url != inst_img_url:
+                        upload_image_(self, img_url, pub_id)
+                    break
 
     class Meta:
         model = Product
